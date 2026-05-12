@@ -31,7 +31,7 @@ Where:
 The architecture is fully modularized and split across highly specialized sub-engines built entirely in safe Rust (with strictly audited constant-time FFI primitives).
 
 ```text
-sentinelmark_core
+sentinelmark_core (Rust Core Engine)
 +-- behavior  -- Runtime behavioral entropy capture (CPU, virtual/physical memory, OS Jitter)
 +-- crypto    -- Core audited wrappers (HKDF-SHA256, SHA-256 via ring, constant-time comparisons via subtle)
 +-- watermark -- BEW Derivation engine enforcing StaticKey drop-zeroization
@@ -39,6 +39,12 @@ sentinelmark_core
 +-- telemetry -- Dual-serialization schema (serde JSON + zero-copy rkyv) & pre-image projection logic
 +-- verifier  -- Remote validation logic incorporating sliding-window replay detection
 +-- transport -- Resilient async dispatch queue with immutable envelopes & exponential backoff
+
+verify-py (Python Verification Authority)
++-- api          -- FastAPI ingestion endpoints (/ingest, /verify, /health)
++-- schemas      -- Pydantic validation mapping exact 256-bit payload constraints
++-- verification -- Constant-time logic recomputing BEW watermarks via OpenSSL C-bindings
++-- trust        -- Deterministic scalar trust scoring evaluation engine
 ```
 
 ### Phase 1 Features
@@ -56,6 +62,11 @@ sentinelmark_core
   * **Immutable Envelopes**: Pre-serializes canonical payloads at the exact moment of event finalization. Retries never invoke `serde` routines, protecting nonces and timestamps from shifting across TCP reattempts.
   * **Resilient Worker Queue**: Non-blocking `tokio::sync::mpsc` queue decoupling generation loops from network bottlenecks.
   * **Deterministic Backoff**: Applies base-multiplied exponential retry delays strictly on transient backend status codes (`5xx`, `429`).
+* **Python Verification Authority (`verify-py`)**:
+  * **FastAPI Adjudication Services**: Asynchronous API endpoints consuming pre-serialized JSON envelopes securely.
+  * **Cross-Language Binary Parity**: Custom struct packing (`<IQQIQQ`) precisely reconstructing little-endian memory layout to guarantee deterministic watermark verification across Rust and Python runtimes.
+  * **Constant-Time Verification**: Uses OpenSSL C-bindings via `cryptography` alongside `hmac.compare_digest` to thwart side-channel guessing attacks against `K_static`.
+  * **Deterministic Trust Engine**: Translates complex cryptanalytic and chronological assertions into highly auditable, bounded `0.0 -> 1.0` scalar trust scores.
 
 ---
 
