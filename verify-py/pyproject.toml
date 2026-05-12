@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "sentinelmark-verify"
+version = "0.1.0"
+description = "Forensic verification authority for SentinelMark telemetry"
+authors = ["Bibek Das <bibekdas1055@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+pydantic = "^2.6.0"
+cryptography = "^42.0.0"
+sqlalchemy = "^2.0.0"
+numpy = "^1.26.0"
+scipy = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
