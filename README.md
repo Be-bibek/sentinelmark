@@ -124,7 +124,7 @@ chain.append(&event).unwrap();
 ## 🎓 Author & Attribution
 
 **Bibek Das**  
-* Department of Computer Science & Engineering  
+* B.Tech Scholar, **Electronics and Communication Engineering (ECE)**  
 * **Guru Nanak Institute of Technology**  
 * Email: [bibekdas1055@gmail.com](mailto:bibekdas1055@gmail.com)  
 * GitHub: [@Be-bibek](https://github.com/Be-bibek)  
