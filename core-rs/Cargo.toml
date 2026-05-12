@@ -1,0 +1,163 @@
+[package]
+name        = "sentinelmark-core"
+version     = "0.1.0"
+edition     = "2021"
+authors     = ["ProofTrace Research Team"]
+description = "Behavior-Entangled Watermarking (BEW) — cryptographic trust primitive for tamper-evident forensic telemetry"
+license     = "MIT OR Apache-2.0"
+repository  = "https://github.com/proofdtrace/sentinelmark"
+keywords    = ["cryptography", "watermarking", "forensics", "telemetry", "security"]
+categories  = ["cryptography", "security"]
+rust-version = "1.75"
+
+# ------------------------------------------------------------------
+# Library target — no binary, consumed as a lib or via FFI/PyO3
+# ------------------------------------------------------------------
+[lib]
+name    = "sentinelmark_core"
+crate-type = ["cdylib", "rlib"]   # cdylib for PyO3; rlib for Rust consumers
+
+# ------------------------------------------------------------------
+# Feature flags
+# ------------------------------------------------------------------
+[features]
+default    = ["std", "sysinfo-capture"]
+std        = []
+sysinfo-capture = ["sysinfo"]          # enable live behavioral sampling
+pyo3-ext   = ["pyo3"]                  # enable Python bindings
+bench-mode = []                         # expose internals for criterion benchmarks
+
+# ------------------------------------------------------------------
+# Core cryptographic dependencies
+# ------------------------------------------------------------------
+[dependencies]
+
+# HKDF — RFC 5869 compliant key derivation
+hkdf  = { version = "0.12", features = [] }
+
+# SHA-2 family (SHA-256 for HKDF-SHA256)
+sha2  = { version = "0.10", default-features = false, features = ["oid"] }
+
+# ring — BoringSSL-backed AEAD, HMAC, RNG, constant-time ops
+ring  = { version = "0.17", features = ["std"] }
+
+# Constant-time comparison — prevents timing oracles on secret comparisons
+subtle = { version = "2.5", default-features = false, features = ["std"] }
+
+# Secure memory zeroization — wipes secrets from stack + heap on drop
+zeroize = { version = "1.7", features = ["derive", "alloc"] }
+
+# ------------------------------------------------------------------
+# Serialization
+# ------------------------------------------------------------------
+
+# Human-readable + JSON-compatible serialization (for transport / Python API)
+serde      = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["std"] }
+
+# rkyv — zero-copy deterministic binary serialization (for benchmarks + on-wire)
+rkyv = { version = "0.7", features = ["validation", "strict"] }
+
+# ------------------------------------------------------------------
+# Async runtime
+# ------------------------------------------------------------------
+
+# Tokio — multi-threaded async executor for transport layer
+tokio = { version = "1", features = ["full"] }
+
+# reqwest — async HTTP client for telemetry transport
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] }
+
+# ------------------------------------------------------------------
+# Error handling
+# ------------------------------------------------------------------
+
+# anyhow — ergonomic error propagation
+anyhow = { version = "1", features = ["std"] }
+
+# thiserror — typed domain errors (used in watermark + chain modules)
+thiserror = { version = "1" }
+
+# ------------------------------------------------------------------
+# Observability
+# ------------------------------------------------------------------
+
+# tracing — structured, async-aware logging
+tracing            = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# ------------------------------------------------------------------
+# Time — deterministic timestamps
+# ------------------------------------------------------------------
+chrono = { version = "0.4", features = ["serde"] }
+
+# ------------------------------------------------------------------
+# Entropy / nonce generation
+# ------------------------------------------------------------------
+# We use ring::rand::SystemRandom; no separate rand crate needed.
+
+# ------------------------------------------------------------------
+# Behavioral sampling (optional feature)
+# ------------------------------------------------------------------
+sysinfo = { version = "0.30", optional = true }
+
+# ------------------------------------------------------------------
+# Python bindings (optional feature)
+# ------------------------------------------------------------------
+pyo3 = { version = "0.21", features = ["extension-module"], optional = true }
+
+# ------------------------------------------------------------------
+# Hex encoding for display/debug (no runtime cost on hot path)
+# ------------------------------------------------------------------
+hex = { version = "0.4", features = ["serde"] }
+
+# ------------------------------------------------------------------
+# UUID — unique device / session identifiers
+# ------------------------------------------------------------------
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# ------------------------------------------------------------------
+# Benchmark harnesses
+# ------------------------------------------------------------------
+[dev-dependencies]
+criterion   = { version = "0.5", features = ["html_reports"] }
+proptest    = { version = "1" }   # property-based testing for watermark invariants
+tokio-test  = { version = "0.4" }
+
+[[bench]]
+name    = "watermark_derivation"
+harness = false
+
+[[bench]]
+name    = "chain_integrity"
+harness = false
+
+[[bench]]
+name    = "serialization_overhead"
+harness = false
+
+[[bench]]
+name    = "verification_throughput"
+harness = false
+
+# ------------------------------------------------------------------
+# Profile: release — tuned for benchmark accuracy
+# ------------------------------------------------------------------
+[profile.release]
+opt-level       = 3
+lto             = "thin"
+codegen-units   = 1
+panic           = "abort"
+strip           = false       # keep symbols for profiling
+debug           = 1           # minimal debug info for perf tools
+
+[profile.bench]
+inherits = "release"
+debug    = true               # full debug info for flamegraphs
+
+# ------------------------------------------------------------------
+# Profile: dev — fast iteration
+# ------------------------------------------------------------------
+[profile.dev]
+opt-level = 1                 # avoid O(n) debug builds for crypto
+overflow-checks = true

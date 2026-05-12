@@ -1,0 +1,18 @@
+# Generated files
+core-rs/target/
+target/
+**/*.rs.bk
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.qodo/
+
+# OS metadata
+.DS_Store
+Thumbs.db
