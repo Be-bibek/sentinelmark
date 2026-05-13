@@ -3,7 +3,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Rust Version](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![E2E Tests](https://img.shields.io/badge/tests-36%2F36%20passed-success.svg)]()
+[![E2E Tests](https://img.shields.io/badge/tests-48%2F48%20passed-success.svg)]()
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
+[![Phase](https://img.shields.io/badge/phase-3%20stateful%20authority-purple.svg)]()
 
 **SentinelMark** is the core cryptographic trust primitive and forensic telemetry subsystem for the **ProofTrace** cybersecurity infrastructure platform. It introduces a highly resilient, research-grade implementation of **Behavior-Entangled Watermarking (BEW)**.
 
@@ -62,11 +64,15 @@ verify-py (Python Verification Authority)
   * **Immutable Envelopes**: Pre-serializes canonical payloads at the exact moment of event finalization. Retries never invoke `serde` routines, protecting nonces and timestamps from shifting across TCP reattempts.
   * **Resilient Worker Queue**: Non-blocking `tokio::sync::mpsc` queue decoupling generation loops from network bottlenecks.
   * **Deterministic Backoff**: Applies base-multiplied exponential retry delays strictly on transient backend status codes (`5xx`, `429`).
-* **Python Verification Authority (`verify-py`)**:
-  * **FastAPI Adjudication Services**: Asynchronous API endpoints consuming pre-serialized JSON envelopes securely.
-  * **Cross-Language Binary Parity**: Custom struct packing (`<IQQIQQ`) precisely reconstructing little-endian memory layout to guarantee deterministic watermark verification across Rust and Python runtimes.
-  * **Constant-Time Verification**: Uses OpenSSL C-bindings via `cryptography` alongside `hmac.compare_digest` to thwart side-channel guessing attacks against `K_static`.
-  * **Deterministic Trust Engine**: Translates complex cryptanalytic and chronological assertions into highly auditable, bounded `0.0 -> 1.0` scalar trust scores.
+* **Phase 3 — Stateful Python Verification Authority (`verify-py`)**:
+  * **4-Stage Forensic Pipeline**: Structural → Cryptographic Integrity → Replay Validation → Behavioral Authenticity. Each stage fails fast and persists the rejection verdict before aborting.
+  * **SQLite Audit Ledger**: Append-only `TelemetryLog` table — every ingest attempt (verified or rejected) is permanently recorded. No `UPDATE`/`DELETE` on forensic evidence.
+  * **Crash-Resilient Nonce Cache**: `NonceCache` backed by SQLite WAL-mode replaces the ephemeral in-memory set, closing the process-restart replay window permanently.
+  * **Cross-Language Binary Parity**: `struct.pack("<IQQIQQ")` in Python maps exactly to Rust's `.to_le_bytes()` field-by-field serialization for deterministic `BehaviorFingerprint_i` computation.
+  * **Constant-Time Watermark Verification**: `hmac.compare_digest()` via OpenSSL C-bindings neutralizes timing oracle attacks against `K_static`.
+  * **Statistical Behavioral Authenticity Engine**: Z-score analysis (`Z = |x - μ| / σ`) over a 50-event rolling window detects entropy collapse (σ ≈ 0) and distribution-shift anomalies in CPU, memory, and jitter metrics.
+  * **5-Dimensional Trust Scoring**: Cryptographic (0.40) + Chain (0.25) + Replay (0.20) + Timestamp (0.10) + Behavioral (0.05) = `[0.0, 1.0]` deterministic scalar.
+  * **Adversarial Attack Simulation Framework**: Scripted replay, forgery, and entropy-collapse simulations in `benchmarks/attacks/` generating CSV results for IEEE figure reproduction.
 
 ---
 
@@ -81,20 +87,37 @@ verify-py (Python Verification Authority)
 ## 📦 Getting Started
 
 ### Prerequisites
-* Rust Toolchain `1.75` or higher.
+* **Rust** Toolchain `1.75` or higher — for `core-rs`.
+* **Python** `3.10+` and `pip` / `poetry` — for `verify-py`.
 * Platform compilation tools (Windows MSVC, Linux GNU, or macOS LLVM).
 
-### Testing & Verification
-Execute the entire hardened test suite covering unit validation, behavioral anti-tampering bounds, integration execution, and network retry exhaustion simulations:
-
+### Rust Core Engine
 ```bash
-cargo test --workspace
+cd core-rs
+cargo test --workspace   # Run all 36 unit + integration tests
+cargo bench              # Run Criterion benchmarks
 ```
 
-Run Criterion evaluation targets (requires enabling compilation feature flags):
-
+### Python Verification Authority
 ```bash
-cargo bench --features "bench-mode"
+cd verify-py
+pip install fastapi uvicorn pydantic cryptography sqlalchemy numpy scipy
+pip install pytest pytest-asyncio httpx   # Dev dependencies
+
+# Run test suite (17 tests covering all 7 attack vectors)
+python -m pytest tests/ -v
+
+# Start the verification server
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Adversarial Attack Simulations
+```bash
+cd verify-py
+python benchmarks/attacks/sim_replay.py          # ATK-01: Replay attack
+python benchmarks/attacks/sim_entropy_collapse.py # ATK-02: Forgery attack
+python benchmarks/attacks/sim_latency.py          # Crypto latency baseline
+# Results written to benchmarks/results/
 ```
 
 ---
