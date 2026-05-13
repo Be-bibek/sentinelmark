@@ -171,6 +171,7 @@ mod tests {
     fn make_event_at(time: DateTime<Utc>) -> TelemetryEvent {
         let mut e = TelemetryEvent::new(
             "device",
+            1,
             [0u8; HASH_LEN],
             serde_json::json!({}),
         ).unwrap();

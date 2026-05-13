@@ -50,6 +50,7 @@ fn test_single_event_bew_protocol() {
     // Step 2: Construct telemetry event
     let mut event = TelemetryEvent::new(
         "device-001",
+        1,
         GENESIS_HASH,
         serde_json::json!({"sensor": "cpu_temp", "value": 72.3}),
     )
@@ -98,6 +99,7 @@ fn test_three_event_chain_end_to_end() {
 
         let mut event = TelemetryEvent::new(
             "device-chain-test",
+            (i + 1) as u64,
             prev_hash,
             serde_json::json!({"seq": i}),
         )
@@ -138,6 +140,7 @@ fn test_forged_watermark_rejected() {
 
     let mut event = TelemetryEvent::new(
         "device-forge-test",
+        1,
         GENESIS_HASH,
         serde_json::json!({}),
     ).unwrap();
@@ -165,7 +168,7 @@ fn test_replay_breaks_chain() {
     let behavior = snap.to_digest();
     let mut chain = ChainManager::new();
 
-    let mut event = TelemetryEvent::new("device", GENESIS_HASH, serde_json::json!({})).unwrap();
+    let mut event = TelemetryEvent::new("device", 1, GENESIS_HASH, serde_json::json!({})).unwrap();
     let wm = engine.derive(&behavior, &event.prev_hash, &event.nonce).unwrap();
     event.set_watermark(wm.into_bytes());
     event.finalize().unwrap();

@@ -31,18 +31,10 @@ class BehavioralAnalyzer:
     @staticmethod
     def extract_metric(logs: List[TelemetryLog], current_val: int, metric_name: str) -> Tuple[np.ndarray, float]:
         """Extracts historical array + current value for a metric."""
-        import json
-        history = []
         for log in logs:
-            try:
-                # payload.behavior_snapshot.X
-                payload_dict = json.loads(log.raw_payload)
-                snap = payload_dict.get("behavior_snapshot", {})
-                val = snap.get(metric_name)
-                if val is not None:
-                    history.append(val)
-            except Exception:
-                continue
+            val = getattr(log, metric_name, None)
+            if val is not None:
+                history.append(val)
                 
         return np.array(history, dtype=np.float64), float(current_val)
 
@@ -66,9 +58,9 @@ class BehavioralAnalyzer:
         reasons = []
         
         metrics_to_check = [
-            ("cpu_usage_pct_x100", current_snapshot.cpu_usage_pct_x100, "z_score_cpu"),
-            ("physical_memory_bytes", current_snapshot.physical_memory_bytes, "z_score_memory"),
-            ("jitter_ns", current_snapshot.jitter_ns, "z_score_jitter"),
+            ("cpu_usage", current_snapshot.cpu_usage_pct_x100, "z_score_cpu"),
+            ("memory_usage", current_snapshot.physical_memory_bytes, "z_score_memory"),
+            ("timing_jitter", current_snapshot.jitter_ns, "z_score_jitter"),
         ]
         
         results = {"behavior_anomaly": False, "z_score_cpu": 0.0, "z_score_memory": 0.0, "z_score_jitter": 0.0, "reason": ""}

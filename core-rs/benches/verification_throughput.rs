@@ -28,7 +28,7 @@ fn bench_verify_single(c: &mut Criterion) {
     let behavior = snap.to_digest();
 
     let mut event = TelemetryEvent::new(
-        "bench-device", [0u8; HASH_LEN], serde_json::json!({}),
+        "bench-device", 1, [0u8; HASH_LEN], serde_json::json!({}),
     ).unwrap();
 
     let wm = engine.derive(&behavior, &event.prev_hash, &event.nonce).unwrap();

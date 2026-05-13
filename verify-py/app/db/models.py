@@ -30,7 +30,7 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Float, Boolean, DateTime,
-    Text, Index, UniqueConstraint
+    Text, Index, UniqueConstraint, Integer
 )
 from sqlalchemy.orm import DeclarativeBase
 
@@ -72,8 +72,20 @@ class TelemetryLog(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     device_id = Column(String(255), nullable=False)
     event_id = Column(String(36), nullable=False)
+    sequence_number = Column(Integer, nullable=False)
     timestamp_utc = Column(DateTime(timezone=True), nullable=False)
     nonce = Column(String(64), nullable=False)
+    
+    # Normalized Forensic Hashes
+    current_hash = Column(String(64), nullable=False, default="0"*64)
+    prev_hash = Column(String(64), nullable=False, default="0"*64)
+
+    # Normalized Behavioral Metrics
+    cpu_usage = Column(Integer, nullable=True)
+    memory_usage = Column(Integer, nullable=True)
+    timing_jitter = Column(Integer, nullable=True)
+    thread_count = Column(Integer, nullable=True)
+
     trust_score = Column(Float, nullable=False)
     replay_detected = Column(Boolean, nullable=False, default=False)
     tamper_detected = Column(Boolean, nullable=False, default=False)
@@ -92,10 +104,12 @@ class TelemetryLog(Base):
     )
 
     __table_args__ = (
-        # Composite index for fast per-device chronological queries (behavioral analysis)
-        Index("ix_telemetry_device_time", "device_id", "timestamp_utc"),
+        # Composite index for fast per-device causal queries (chain validation)
+        Index("ix_telemetry_device_seq", "device_id", "sequence_number"),
         # Fast nonce lookup for replay deduplication
         Index("ix_telemetry_nonce", "nonce"),
+        # Fast hash lookup
+        Index("ix_telemetry_current_hash", "current_hash"),
     )
 
     def __repr__(self) -> str:

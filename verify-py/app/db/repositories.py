@@ -44,8 +44,15 @@ class TelemetryRepository:
         *,
         device_id: str,
         event_id: str,
+        sequence_number: int,
         timestamp_utc: datetime,
         nonce: str,
+        current_hash: str,
+        prev_hash: str,
+        cpu_usage: int,
+        memory_usage: int,
+        timing_jitter: int,
+        thread_count: int,
         trust_score: float,
         replay_detected: bool,
         tamper_detected: bool,
@@ -62,8 +69,15 @@ class TelemetryRepository:
         row = TelemetryLog(
             device_id=device_id,
             event_id=event_id,
+            sequence_number=sequence_number,
             timestamp_utc=timestamp_utc,
             nonce=nonce,
+            current_hash=current_hash,
+            prev_hash=prev_hash,
+            cpu_usage=cpu_usage,
+            memory_usage=memory_usage,
+            timing_jitter=timing_jitter,
+            thread_count=thread_count,
             trust_score=trust_score,
             replay_detected=replay_detected,
             tamper_detected=tamper_detected,
@@ -93,7 +107,7 @@ class TelemetryRepository:
             .where(TelemetryLog.device_id == device_id)
             .where(TelemetryLog.tamper_detected == False)
             .where(TelemetryLog.replay_detected == False)
-            .order_by(TelemetryLog.timestamp_utc.desc())
+            .order_by(TelemetryLog.sequence_number.desc())
             .limit(limit)
         )
         return list(self.db.execute(stmt).scalars().all())

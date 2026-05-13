@@ -71,38 +71,23 @@ def validate_chain(
     
     Returns True if both checks pass (chain integrity maintained).
     """
-    # Look up the most recent verified, non-tampered event for this device
+    # Look up the causally latest verified, non-tampered event for this device
     stmt = (
-        select(TelemetryLog.nonce)
-        .add_columns(TelemetryLog.claimed_current_hash if hasattr(TelemetryLog, 'claimed_current_hash') else TelemetryLog.nonce)
-        .where(TelemetryLog.device_id == device_id)
-        .where(TelemetryLog.tamper_detected == False)
-        .where(TelemetryLog.replay_detected == False)
-        .order_by(TelemetryLog.timestamp_utc.desc())
-        .limit(1)
-    )
-    # Simplified: query the raw_payload of last event to extract its current_hash
-    last_stmt = (
         select(TelemetryLog)
         .where(TelemetryLog.device_id == device_id)
         .where(TelemetryLog.tamper_detected == False)
         .where(TelemetryLog.replay_detected == False)
-        .order_by(TelemetryLog.timestamp_utc.desc())
+        .order_by(TelemetryLog.sequence_number.desc())
         .limit(1)
     )
-    last_event: Optional[TelemetryLog] = db.execute(last_stmt).scalar_one_or_none()
+    last_event: Optional[TelemetryLog] = db.execute(stmt).scalar_one_or_none()
 
     if last_event is None:
         # First event for this device — prev_hash must be GENESIS_HASH
         expected_prev = GENESIS_HASH
     else:
-        # Extract current_hash from the last event's raw JSON payload
-        import json
-        try:
-            last_payload = json.loads(last_event.raw_payload)
-            expected_prev = last_payload.get("current_hash", GENESIS_HASH)
-        except Exception:
-            expected_prev = GENESIS_HASH
+        # Extract current_hash directly from the normalized column (O(1))
+        expected_prev = last_event.current_hash
 
     # Check 1: prev_hash linkage
     if prev_hash.lower() != expected_prev.lower():

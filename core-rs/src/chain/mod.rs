@@ -37,6 +37,7 @@ pub const GENESIS_HASH: [u8; HASH_LEN] = [0u8; HASH_LEN];
 /// Thread-safety: wrap in `Arc<tokio::sync::Mutex<ChainManager>>` for shared use.
 pub struct ChainManager {
     last_hash: [u8; HASH_LEN],
+    expected_seq: u64,
     event_count: u64,
 }
 
@@ -46,6 +47,7 @@ impl ChainManager {
     pub fn new() -> Self {
         Self {
             last_hash: GENESIS_HASH,
+            expected_seq: 1, // Genesis event should be seq 1
             event_count: 0,
         }
     }
@@ -69,6 +71,14 @@ impl ChainManager {
     /// - `ChainError::HashInconsistent` if `event.current_hash` doesn't match
     ///   the SHA-256 of the event's canonical form
     pub fn append(&mut self, event: &TelemetryEvent) -> Result<(), ChainError> {
+        // Verify sequence number is strictly monotonic and causal
+        if event.sequence_number != self.expected_seq {
+            return Err(ChainError::SequenceMismatch {
+                expected: self.expected_seq,
+                got: event.sequence_number,
+            });
+        }
+
         // Verify prev_hash links correctly (constant-time)
         if !ct_bytes_eq(&event.prev_hash, &self.last_hash) {
             return Err(ChainError::PrevHashMismatch {
@@ -90,6 +100,7 @@ impl ChainManager {
         }
 
         self.last_hash = event.current_hash;
+        self.expected_seq += 1;
         self.event_count += 1;
         Ok(())
     }
@@ -103,8 +114,16 @@ impl ChainManager {
         }
 
         let mut expected_prev = GENESIS_HASH;
+        let mut expected_seq = 1;
 
         for (i, event) in events.iter().enumerate() {
+            if event.sequence_number != expected_seq {
+                return Err(ChainError::SequenceMismatch {
+                    expected: expected_seq,
+                    got: event.sequence_number,
+                });
+            }
+
             if !ct_bytes_eq(&event.prev_hash, &expected_prev) {
                 return Err(ChainError::PrevHashMismatch {
                     expected: hex::encode(&expected_prev),
@@ -124,6 +143,7 @@ impl ChainManager {
             }
 
             expected_prev = event.current_hash;
+            expected_seq += 1;
         }
 
         Ok(())
@@ -148,6 +168,15 @@ pub enum ChainError {
         expected: String,
         /// The hash actually present in the event.
         got: String,
+    },
+
+    /// The event's sequence number does not match expected causal ordering.
+    #[error("sequence mismatch: expected {expected}, got {got}")]
+    SequenceMismatch {
+        /// The sequence we expected.
+        expected: u64,
+        /// The sequence actually present in the event.
+        got: u64,
     },
 
     /// The event's `current_hash` is inconsistent with its content.
@@ -178,11 +207,12 @@ mod tests {
     use super::*;
     use crate::telemetry::{TelemetryEvent, WATERMARK_LEN, HASH_LEN};
 
-    fn make_finalized_event(prev_hash: [u8; HASH_LEN]) -> TelemetryEvent {
+    fn make_finalized_event(seq: u64, prev_hash: [u8; HASH_LEN]) -> TelemetryEvent {
         let mut e = TelemetryEvent::new(
             "test-device",
+            seq,
             prev_hash,
-            serde_json::json!({"seq": 1}),
+            serde_json::json!({"seq": seq}),
         ).unwrap();
         e.set_watermark([0xaa_u8; WATERMARK_LEN]);
         e.finalize().unwrap();
@@ -192,7 +222,7 @@ mod tests {
     #[test]
     fn test_chain_append_genesis() {
         let mut chain = ChainManager::new();
-        let e = make_finalized_event(GENESIS_HASH);
+        let e = make_finalized_event(1, GENESIS_HASH);
         assert!(chain.append(&e).is_ok());
         assert_eq!(chain.event_count(), 1);
     }
@@ -200,11 +230,11 @@ mod tests {
     #[test]
     fn test_chain_append_linked() {
         let mut chain = ChainManager::new();
-        let e1 = make_finalized_event(GENESIS_HASH);
+        let e1 = make_finalized_event(1, GENESIS_HASH);
         let e1_hash = e1.current_hash;
         chain.append(&e1).unwrap();
 
-        let e2 = make_finalized_event(e1_hash);
+        let e2 = make_finalized_event(2, e1_hash);
         assert!(chain.append(&e2).is_ok());
         assert_eq!(chain.event_count(), 2);
     }
@@ -212,16 +242,16 @@ mod tests {
     #[test]
     fn test_chain_rejects_wrong_prev_hash() {
         let mut chain = ChainManager::new();
-        let e = make_finalized_event([0xff_u8; HASH_LEN]); // wrong prev_hash
+        let e = make_finalized_event(1, [0xff_u8; HASH_LEN]); // wrong prev_hash
         let result = chain.append(&e);
         assert!(matches!(result, Err(ChainError::PrevHashMismatch { .. })));
     }
 
     #[test]
     fn test_full_chain_verification() {
-        let e1 = make_finalized_event(GENESIS_HASH);
-        let e2 = make_finalized_event(e1.current_hash);
-        let e3 = make_finalized_event(e2.current_hash);
+        let e1 = make_finalized_event(1, GENESIS_HASH);
+        let e2 = make_finalized_event(2, e1.current_hash);
+        let e3 = make_finalized_event(3, e2.current_hash);
 
         let chain = vec![e1, e2, e3];
         assert!(ChainManager::verify_chain(&chain).is_ok());
@@ -229,8 +259,8 @@ mod tests {
 
     #[test]
     fn test_tampered_event_detected() {
-        let e1 = make_finalized_event(GENESIS_HASH);
-        let mut e2 = make_finalized_event(e1.current_hash);
+        let e1 = make_finalized_event(1, GENESIS_HASH);
+        let mut e2 = make_finalized_event(2, e1.current_hash);
         // Tamper with payload without updating current_hash
         e2.watermark = [0x00_u8; WATERMARK_LEN]; // mutate without re-finalizing
 

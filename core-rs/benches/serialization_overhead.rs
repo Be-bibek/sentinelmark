@@ -8,6 +8,7 @@ use sentinelmark_core::telemetry::{TelemetryEvent, WATERMARK_LEN, HASH_LEN};
 fn make_event() -> TelemetryEvent {
     let mut e = TelemetryEvent::new(
         "bench-device",
+        1,
         [0u8; HASH_LEN],
         serde_json::json!({"metric": "cpu", "value": 42}),
     )

@@ -46,6 +46,7 @@ async fn test_transport_retry_exhaustion() {
     
     let mut event = TelemetryEvent::new(
         "device-test-transport",
+        1,
         GENESIS_HASH,
         serde_json::json!({"test": "retry"}),
     ).unwrap();

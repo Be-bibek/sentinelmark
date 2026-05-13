@@ -25,11 +25,11 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TrustWeights:
-    watermark: float = 0.40
-    chain: float = 0.25
-    replay: float = 0.20
-    timestamp: float = 0.10
-    behavior: float = 0.05
+    watermark: int = 400
+    chain: int = 250
+    replay: int = 200
+    timestamp: int = 100
+    behavior: int = 50
 
 
 WEIGHTS = TrustWeights()
@@ -48,16 +48,16 @@ def compute_trust_score(
     All inputs are boolean — deliberately coarse to prevent gaming the scorer
     with marginal float manipulations.
     """
-    score = 0.0
+    score_x1000 = 0
     if watermark_valid:
-        score += WEIGHTS.watermark
+        score_x1000 += WEIGHTS.watermark
     if chain_valid:
-        score += WEIGHTS.chain
+        score_x1000 += WEIGHTS.chain
     if replay_absent:
-        score += WEIGHTS.replay
+        score_x1000 += WEIGHTS.replay
     if timestamp_valid:
-        score += WEIGHTS.timestamp
+        score_x1000 += WEIGHTS.timestamp
     if behavior_authentic:
-        score += WEIGHTS.behavior
+        score_x1000 += WEIGHTS.behavior
 
-    return round(score, 4)
+    return score_x1000 / 1000.0

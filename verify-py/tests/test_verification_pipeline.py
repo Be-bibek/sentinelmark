@@ -58,6 +58,7 @@ def _make_snapshot(
 
 def _make_valid_event(
     nonce: str | None = None,
+    sequence_number: int = 1,
     prev_hash: str = GENESIS_HASH,
     snapshot: BehaviorSnapshot | None = None,
     device_id: str = TEST_DEVICE,
@@ -96,6 +97,7 @@ def _make_valid_event(
     return TelemetryEvent(
         schema_version=1,
         event_id=uuid.uuid4(),
+        sequence_number=sequence_number,
         captured_at=captured_at,
         device_id=device_id,
         nonce=nonce,
@@ -281,13 +283,9 @@ def test_behavioral_analyzer_entropy_collapse():
     logs = []
     for i in range(15):
         mock_log = MagicMock()
-        mock_log.raw_payload = json.dumps({
-            "behavior_snapshot": {
-                "cpu_usage_pct_x100": 5000,
-                "physical_memory_bytes": 512_000_000,
-                "jitter_ns": 0,  # Perfectly zero — synthetic telemetry signature
-            }
-        })
+        mock_log.cpu_usage = 5000
+        mock_log.memory_usage = 512_000_000
+        mock_log.timing_jitter = 0  # Perfectly zero — synthetic telemetry signature
         logs.append(mock_log)
 
     current = _make_snapshot(jitter=0, cpu=5000, pmem=512_000_000)
@@ -302,13 +300,9 @@ def test_behavioral_analyzer_z_score_violation():
     logs = []
     for i in range(15):
         mock_log = MagicMock()
-        mock_log.raw_payload = json.dumps({
-            "behavior_snapshot": {
-                "cpu_usage_pct_x100": 500,  # Historical: ~5% CPU
-                "physical_memory_bytes": 512_000_000,
-                "jitter_ns": 10_000,
-            }
-        })
+        mock_log.cpu_usage = 500
+        mock_log.memory_usage = 512_000_000
+        mock_log.timing_jitter = 10_000
         logs.append(mock_log)
 
     # Current event: CPU suddenly at 99% (9900/100 = 99% usage)

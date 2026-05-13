@@ -16,6 +16,7 @@ fn make_chain(n: usize) -> Vec<TelemetryEvent> {
     for i in 0..n {
         let mut e = TelemetryEvent::new(
             "bench-device",
+            (i + 1) as u64,
             prev,
             serde_json::json!({"seq": i}),
         )

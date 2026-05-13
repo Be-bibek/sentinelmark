@@ -114,6 +114,9 @@ pub struct TelemetryEvent {
     /// Unique event identifier (UUID v4).
     pub event_id: EventId,
 
+    /// Monotonic sequence number.
+    pub sequence_number: u64,
+
     /// UTC timestamp of event creation (RFC 3339, nanosecond precision).
     pub captured_at: DateTime<Utc>,
 
@@ -158,6 +161,7 @@ impl TelemetryEvent {
     /// Returns [`TelemetryError::RngFailure`] if the OS CSPRNG is unavailable.
     pub fn new(
         device_id: impl Into<String>,
+        sequence_number: u64,
         prev_hash: [u8; HASH_LEN],
         payload: serde_json::Value,
     ) -> Result<Self, TelemetryError> {
@@ -169,6 +173,7 @@ impl TelemetryEvent {
         Ok(Self {
             schema_version: SCHEMA_VERSION,
             event_id: EventId::new(),
+            sequence_number,
             captured_at: Utc::now(),
             device_id: device_id.into(),
             nonce,
@@ -220,6 +225,7 @@ impl TelemetryEvent {
         let preimage = TelemetryPreimage {
             schema_version: self.schema_version,
             event_id: &self.event_id,
+            sequence_number: self.sequence_number,
             captured_at: &self.captured_at,
             device_id: &self.device_id,
             nonce: &self.nonce,
@@ -250,6 +256,7 @@ impl TelemetryEvent {
 struct TelemetryPreimage<'a> {
     schema_version: u8,
     event_id: &'a EventId,
+    sequence_number: u64,
     captured_at: &'a DateTime<Utc>,
     device_id: &'a str,
     #[serde(with = "hex::serde")]
@@ -281,9 +288,10 @@ pub enum TelemetryError {
 mod tests {
     use super::*;
 
-    fn make_event() -> TelemetryEvent {
+    fn make_event(seq: u64) -> TelemetryEvent {
         TelemetryEvent::new(
             "device-test-001",
+            seq,
             [0u8; HASH_LEN],
             serde_json::json!({"test": true}),
         )
@@ -292,15 +300,15 @@ mod tests {
 
     #[test]
     fn test_event_has_fresh_nonce() {
-        let e1 = make_event();
-        let e2 = make_event();
+        let e1 = make_event(1);
+        let e2 = make_event(2);
         // Two events must have different nonces (astronomically unlikely to collide)
         assert_ne!(e1.nonce, e2.nonce);
     }
 
     #[test]
     fn test_finalize_sets_current_hash() {
-        let mut e = make_event();
+        let mut e = make_event(1);
         e.set_watermark([0xab_u8; WATERMARK_LEN]);
         e.finalize().expect("finalize must succeed");
         assert_ne!(e.current_hash, [0u8; HASH_LEN]);
@@ -308,7 +316,7 @@ mod tests {
 
     #[test]
     fn test_serialization_roundtrip() {
-        let mut e = make_event();
+        let mut e = make_event(1);
         e.set_watermark([0xcd_u8; WATERMARK_LEN]);
         e.finalize().unwrap();
 
@@ -322,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_schema_version_is_set() {
-        let e = make_event();
+        let e = make_event(1);
         assert_eq!(e.schema_version, SCHEMA_VERSION);
     }
 }

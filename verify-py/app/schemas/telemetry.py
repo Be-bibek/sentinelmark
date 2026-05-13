@@ -31,6 +31,7 @@ class TelemetryEvent(BaseModel):
     """
     schema_version: int = Field(..., eq=1)
     event_id: UUID4
+    sequence_number: int = Field(..., ge=1)
     captured_at: datetime
     device_id: str
     
