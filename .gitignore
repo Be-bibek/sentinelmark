@@ -16,3 +16,19 @@ target/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+.pytest_cache/
+
+# SQLite databases (stored in data/)
+verify-py/data/*.db
+verify-py/data/*.db-shm
+verify-py/data/*.db-wal

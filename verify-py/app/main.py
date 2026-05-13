@@ -1,73 +1,44 @@
-import logging
-import os
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+"""
+app/main.py — SentinelMark Forensic Verification Authority
 
-from app.schemas.telemetry import TelemetryEvent, ForensicVerdict
-from app.verification.pipeline import process_telemetry
+Phase 3: Stateful Forensic Verification Authority
+- SQLite-backed persistent audit ledger
+- Crash-resilient replay protection
+- 4-stage forensic verification pipeline
+- Statistical behavioral authenticity analysis
+- Deterministic 5-dimensional trust scoring
+- Network trust metrics API
+"""
 
-# ─── Logging Configuration ───────────────────────────────────────────────────
-LOG_DIR = "logs"
-os.makedirs(LOG_DIR, exist_ok=True)
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(f"{LOG_DIR}/sentinel_cloud.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("sentinel_cloud")
+from app.db.session import init_db
+from app.logging.config import configure_logging
+from app.api import ingest, health, metrics
 
-# ─── FastAPI Scaffolding ─────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup: configure logging, initialize database."""
+    configure_logging()
+    init_db()
+    yield
+    # Cleanup on shutdown (if needed in future)
+
+
 app = FastAPI(
     title="SentinelMark Verification Authority",
-    description="Forensic telemetry ingestion and cryptographically secure verification.",
-    version="0.1.0"
+    description=(
+        "Phase 3 Forensic Telemetry Authority: stateful replay defense, "
+        "behavioral authenticity validation, adversarial telemetry evaluation, "
+        "and reproducible forensic benchmarking."
+    ),
+    version="3.0.0",
+    lifespan=lifespan,
 )
 
-@app.get("/health")
-async def health_check():
-    """Liveness probe for the verification engine."""
-    return {"status": "operational", "crypto_engine": "online"}
-
-@app.post("/verify", response_model=ForensicVerdict)
-async def verify_telemetry(event: TelemetryEvent):
-    """
-    Stateless Adjudication Endpoint.
-    Deserializes the canonical JSON payload and runs the BEW pipeline.
-    """
-    logger.info(f"Verification requested for event: {event.event_id}")
-    try:
-        verdict = process_telemetry(event)
-        return verdict
-    except ValueError as e:
-        logger.error(f"Validation error: {str(e)}")
-        raise HTTPException(status_code=400, detail="Malformed telemetry payload")
-
-@app.post("/ingest", response_model=ForensicVerdict)
-async def ingest_telemetry(event: TelemetryEvent):
-    """
-    Stateful Ingestion Endpoint.
-    Evaluates the telemetry. If fully verified, prepares it for database persistence.
-    """
-    verdict = process_telemetry(event)
-    
-    if verdict.verified:
-        # TODO: Advanced persistence optimization (SQLAlchemy)
-        logger.info(f"Ingested valid event: {event.event_id}")
-    else:
-        logger.warning(f"Rejected malicious/replayed event at ingestion: {event.event_id}")
-        
-    return verdict
-
-@app.get("/logs")
-async def get_logs():
-    """Stub for retrieving recent structured logs."""
-    return {"message": "Log retrieval not implemented in MVP"}
-
-@app.get("/stats")
-async def get_stats():
-    """Stub for returning network trust stats."""
-    return {"total_verified": 0, "total_rejected": 0}
+# Register routers
+app.include_router(health.router)
+app.include_router(ingest.router)
+app.include_router(metrics.router)
