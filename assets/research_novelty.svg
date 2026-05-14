@@ -1,0 +1,135 @@
+<svg width="100%" viewBox="0 0 706.29 625" role="img" xmlns="http://www.w3.org/2000/svg">
+<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">SentinelMark research novelty vs existing work</title>
+<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Comparison showing SentinelMark's unique positioning in cryptographic watermarking, side-channel resilience, and behavioral entropy</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#9C9A92" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+<linearGradient id="grad_green" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0%" stop-color="#97C459"/>
+<stop offset="100%" stop-color="#639922"/>
+</linearGradient>
+<linearGradient id="grad_amber" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0%" stop-color="#EF9F27"/>
+<stop offset="100%" stop-color="#BA7517"/>
+</linearGradient>
+<linearGradient id="grad_blue" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0%" stop-color="#85B7EB"/>
+<stop offset="100%" stop-color="#185FA5"/>
+</linearGradient>
+<linearGradient id="grad_red" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0%" stop-color="#F09595"/>
+<stop offset="100%" stop-color="#A32D2D"/>
+</linearGradient>
+</defs>
+
+<!-- Background -->
+<rect width="100%" height="100%" fill="#ffffff" rx="10"/>
+
+<!-- Title -->
+<text x="353" y="40" text-anchor="middle" style="fill:#333;font-family:sans-serif;font-size:18px;font-weight:600;">SentinelMark: Research Novelty Assessment</text>
+
+<!-- Row 1: Watermarking Approach -->
+<text x="40" y="80" style="fill:#666;font-family:sans-serif;font-size:14px;font-weight:600;">Watermarking Model</text>
+
+<rect x="40" y="95" width="140" height="30" rx="4" fill="#f0f0f0" stroke="#999"/>
+<text x="110" y="115" text-anchor="middle" style="fill:#333;font-family:sans-serif;font-size:12px;">Static Key WM</text>
+<line x1="180" y1="110" x2="210" y2="110" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="220" y="95" width="140" height="30" rx="4" fill="#e8e8e8" stroke="#999"/>
+<text x="290" y="115" text-anchor="middle" style="fill:#333;font-family:sans-serif;font-size:12px;">Crypto-only logs</text>
+<line x1="360" y1="110" x2="390" y2="110" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="400" y="85" width="250" height="50" rx="6" fill="url(#grad_green)" stroke="#3B6D11" stroke-width="2.5"/>
+<text x="525" y="105" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:14px;font-weight:600;">Behavior-Entangled WM</text>
+<text x="525" y="123" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:12px;">Dynamic key = f(device state, secrets)</text>
+
+<circle cx="680" cy="110" r="14" fill="#E43716"/>
+<text x="680" y="114" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:10px;font-weight:bold;">NEW</text>
+
+<!-- Row 2: Side-Channel Resilience -->
+<text x="40" y="180" style="fill:#666;font-family:sans-serif;font-size:14px;font-weight:600;">Side-Channel Defense</text>
+
+<rect x="40" y="195" width="110" height="35" rx="4" fill="url(#grad_red)" stroke="#A32D2D" stroke-width="1.5"/>
+<text x="95" y="210" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">C/C++ impl</text>
+<text x="95" y="225" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">Timing leaks</text>
+<line x1="150" y1="212" x2="190" y2="212" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="200" y="195" width="110" height="35" rx="4" fill="url(#grad_amber)" stroke="#BA7517" stroke-width="1.5"/>
+<text x="255" y="210" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">Rust (naive)</text>
+<text x="255" y="225" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">Variable time</text>
+<line x1="310" y1="212" x2="350" y2="212" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="360" y="185" width="290" height="55" rx="6" fill="url(#grad_green)" stroke="#3B6D11" stroke-width="2.5"/>
+<text x="505" y="205" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:14px;font-weight:600;">Constant-Time Rust Implementation</text>
+<text x="505" y="225" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:12px;">Subtle crate + Zeroize bindings</text>
+
+<!-- Row 3: Forensic Survivability -->
+<text x="40" y="290" style="fill:#666;font-family:sans-serif;font-size:14px;font-weight:600;">Forensic Integrity</text>
+
+<rect x="40" y="305" width="120" height="35" rx="4" fill="url(#grad_red)" stroke="#A32D2D" stroke-width="1.5"/>
+<text x="100" y="320" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">Timestamp Only</text>
+<text x="100" y="335" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">Reorderable</text>
+<line x1="160" y1="322" x2="200" y2="322" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="220" y="305" width="120" height="35" rx="4" fill="url(#grad_blue)" stroke="#185FA5" stroke-width="1.5"/>
+<text x="280" y="320" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">Blockchain</text>
+<text x="280" y="335" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">High overhead</text>
+<line x1="340" y1="322" x2="380" y2="322" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="400" y="295" width="250" height="55" rx="6" fill="url(#grad_green)" stroke="#3B6D11" stroke-width="2.5"/>
+<text x="525" y="315" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:14px;font-weight:600;">Monotonic Hash Chains</text>
+<text x="525" y="335" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:12px;">Causal order + Replay limits</text>
+
+<!-- Row 4: Implementation Quality -->
+<text x="40" y="400" style="fill:#666;font-family:sans-serif;font-size:14px;font-weight:600;">Security Implementation</text>
+
+<rect x="40" y="415" width="80" height="35" rx="4" fill="url(#grad_red)" stroke="#A32D2D" stroke-width="1.5"/>
+<text x="80" y="430" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">C/C++</text>
+<text x="80" y="445" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">Buffer bugs</text>
+<line x1="120" y1="432" x2="160" y2="432" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="180" y="415" width="80" height="35" rx="4" fill="url(#grad_amber)" stroke="#BA7517" stroke-width="1.5"/>
+<text x="220" y="430" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:14px;font-weight:600;">Python</text>
+<text x="220" y="445" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:11px;">Slow crypto</text>
+<line x1="260" y1="432" x2="300" y2="432" marker-end="url(#arrow)" stroke="#9C9A92" stroke-width="1.5"/>
+
+<rect x="320" y="405" width="330" height="55" rx="6" fill="url(#grad_green)" stroke="#3B6D11" stroke-width="2.5"/>
+<text x="485" y="425" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:14px;font-weight:600;">Memory-Safe Rust</text>
+<text x="485" y="445" text-anchor="middle" fill="#ffffff" style="font-family:sans-serif;font-size:12px;">Zero-copy serde, safe FFI bindings</text>
+
+<!-- Summary Table -->
+<text x="353" y="500" text-anchor="middle" style="fill:#333;font-family:sans-serif;font-size:16px;font-weight:600;">IEEE Research Contribution Matrix</text>
+
+<!-- Headers -->
+<rect x="60" y="515" width="240" height="25" fill="#333"/>
+<text x="75" y="532" fill="white" style="font-family:sans-serif;font-size:13px;font-weight:bold;">Research Dimension</text>
+
+<rect x="300" y="515" width="100" height="25" fill="#333"/>
+<text x="350" y="532" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:13px;font-weight:bold;">Score</text>
+
+<rect x="400" y="515" width="250" height="25" fill="#333"/>
+<text x="525" y="532" text-anchor="middle" fill="white" style="font-family:sans-serif;font-size:13px;font-weight:bold;">Impact Rating</text>
+
+<!-- Rows -->
+<rect x="60" y="540" width="240" height="20" fill="#f8f9fa"/>
+<text x="75" y="554" fill="#333" style="font-family:sans-serif;font-size:12px;">Behavior-Entangled Watermarking</text>
+<rect x="300" y="540" width="100" height="20" fill="#f8f9fa"/>
+<text x="350" y="554" text-anchor="middle" fill="#333" style="font-family:sans-serif;font-size:12px;font-weight:bold;">9.2/10</text>
+<rect x="400" y="540" width="250" height="20" fill="#d4edda"/>
+<text x="415" y="554" fill="#155724" style="font-family:sans-serif;font-size:12px;">First dynamic behavioral derivation</text>
+
+<rect x="60" y="560" width="240" height="20" fill="#ffffff"/>
+<text x="75" y="574" fill="#333" style="font-family:sans-serif;font-size:12px;">Causal Protocol Hardening</text>
+<rect x="300" y="560" width="100" height="20" fill="#ffffff"/>
+<text x="350" y="574" text-anchor="middle" fill="#333" style="font-family:sans-serif;font-size:12px;font-weight:bold;">8.8/10</text>
+<rect x="400" y="560" width="250" height="20" fill="#cce5ff"/>
+<text x="415" y="574" fill="#004085" style="font-family:sans-serif;font-size:12px;">Solves distributed OOO delivery</text>
+
+<rect x="60" y="580" width="240" height="20" fill="#f8f9fa"/>
+<text x="75" y="594" fill="#333" style="font-family:sans-serif;font-size:12px;">Performance &amp; Scale</text>
+<rect x="300" y="580" width="100" height="20" fill="#f8f9fa"/>
+<text x="350" y="594" text-anchor="middle" fill="#333" style="font-family:sans-serif;font-size:12px;font-weight:bold;">9.1/10</text>
+<rect x="400" y="580" width="250" height="20" fill="#d4edda"/>
+<text x="415" y="594" fill="#155724" style="font-family:sans-serif;font-size:12px;">1,700+ events/sec, SQLite WAL</text>
+</svg>

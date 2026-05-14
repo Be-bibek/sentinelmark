@@ -23,6 +23,11 @@ By cryptographically fusing long-term static hardware secrets with live, continu
 
 ## 🔬 Core Derivation Primitive
 
+<div align="center">
+  <img src="assets/research_novelty.svg" alt="SentinelMark Research Novelty Assessment" width="800" />
+</div>
+<br/>
+
 Valid watermark tokens require the strict mathematical intersection of both the secret key and the instantaneous runtime behavioral state of the host device.
 
 The derivation equation is defined as:
@@ -37,6 +42,11 @@ Where:
 ---
 
 ## 🚀 Subsystem Architecture
+
+<div align="center">
+  <img src="assets/architecture_layers.svg" alt="SentinelMark Architecture Layers" width="800" />
+</div>
+<br/>
 
 The architecture is fully modularized and split across highly specialized sub-engines built entirely in safe Rust (with strictly audited constant-time FFI primitives).
 
@@ -85,6 +95,14 @@ verify-py (Python Verification Authority)
   * **Forensic Schema Normalization**: Flattens raw payloads into explicitly indexed relational columns (`current_hash`, `prev_hash`, `cpu_usage`, `memory_usage`, `timing_jitter`), eliminating synchronous O(N) JSON deserialization overhead during hot-path verification.
   * **Bit-Perfect Deterministic Scoring**: Operates exclusively on scaled integer math (`trust_score_x1000`) within the evaluation layer, neutralizing cross-platform IEEE 754 floating-point non-determinism.
   * **Volumetric Stress Benchmarks**: Evaluates DB insertion locks and sliding-window pruning logic under extreme adversarial concurrency (10,000+ flood events/sec).
+
+---
+
+## 📊 Performance & Security Trade-offs
+
+<div align="center">
+  <img src="assets/performance_tradeoffs.svg" alt="Rust vs Python vs C++ Performance Tradeoffs" width="800" />
+</div>
 
 ---
 
