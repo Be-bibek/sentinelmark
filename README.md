@@ -1,11 +1,19 @@
-# SentinelMark Cryptographic Engine 🛡️
+<h1 align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2b0000,50:520000,100:800000&height=240&section=header&text=SentinelMark&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Cryptographic%20Trust%20Primitive%20%E2%80%A2%20Forensic%20Telemetry%20Engine&descAlignY=60&descSize=18" alt="SentinelMark Banner" />
+</h1>
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Rust Version](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![E2E Tests](https://img.shields.io/badge/tests-48%2F48%20passed-success.svg)]()
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
-[![Phase](https://img.shields.io/badge/phase-3%20stateful%20authority-purple.svg)]()
+<p align="center">
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=38BDF8&center=true&vCenter=true&width=900&lines=Behavior-Entangled+Watermarking+(BEW);Monotonic+Causal+Ordering+Architecture;Crash-Resilient+Stateful+Replay+Defense;IEEE-Grade+Security+Research+System" alt="Typing SVG" /> 
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-800000.svg?style=flat-square" alt="License" /></a>
+  <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-1.75%2B-E43716.svg?style=flat-square&logo=rust" alt="Rust Version" /></a>
+  <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat-square" alt="Build Status" />
+  <img src="https://img.shields.io/badge/tests-48%2F48%20passed-success.svg?style=flat-square" alt="E2E Tests" />
+  <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.10%2B-3776AB.svg?style=flat-square&logo=python&logoColor=white" alt="Python" /></a>
+  <img src="https://img.shields.io/badge/phase-3.1%20hardened-800000.svg?style=flat-square" alt="Phase" />
+</p>
 
 **SentinelMark** is the core cryptographic trust primitive and forensic telemetry subsystem for the **ProofTrace** cybersecurity infrastructure platform. It introduces a highly resilient, research-grade implementation of **Behavior-Entangled Watermarking (BEW)**.
 
@@ -71,8 +79,12 @@ verify-py (Python Verification Authority)
   * **Cross-Language Binary Parity**: `struct.pack("<IQQIQQ")` in Python maps exactly to Rust's `.to_le_bytes()` field-by-field serialization for deterministic `BehaviorFingerprint_i` computation.
   * **Constant-Time Watermark Verification**: `hmac.compare_digest()` via OpenSSL C-bindings neutralizes timing oracle attacks against `K_static`.
   * **Statistical Behavioral Authenticity Engine**: Z-score analysis (`Z = |x - μ| / σ`) over a 50-event rolling window detects entropy collapse (σ ≈ 0) and distribution-shift anomalies in CPU, memory, and jitter metrics.
-  * **5-Dimensional Trust Scoring**: Cryptographic (0.40) + Chain (0.25) + Replay (0.20) + Timestamp (0.10) + Behavioral (0.05) = `[0.0, 1.0]` deterministic scalar.
   * **Adversarial Attack Simulation Framework**: Scripted replay, forgery, and entropy-collapse simulations in `benchmarks/attacks/` generating CSV results for IEEE figure reproduction.
+* **Phase 3.1 — Protocol Hardening & Causal Ordering**:
+  * **Monotonic Sequence Architecture**: Fuses a strict `sequence_number` ($u64$) into the event derivation and pre-image hashing to ensure chain integrity survives distributed network jitter and out-of-order packet delivery.
+  * **Forensic Schema Normalization**: Flattens raw payloads into explicitly indexed relational columns (`current_hash`, `prev_hash`, `cpu_usage`, `memory_usage`, `timing_jitter`), eliminating synchronous O(N) JSON deserialization overhead during hot-path verification.
+  * **Bit-Perfect Deterministic Scoring**: Operates exclusively on scaled integer math (`trust_score_x1000`) within the evaluation layer, neutralizing cross-platform IEEE 754 floating-point non-determinism.
+  * **Volumetric Stress Benchmarks**: Evaluates DB insertion locks and sliding-window pruning logic under extreme adversarial concurrency (10,000+ flood events/sec).
 
 ---
 
@@ -139,11 +151,13 @@ let mut chain = ChainManager::new();
 
 // 2. Generate and Watermark Telemetry Payload
 let payload = serde_json::json!({"action": "kernel_auth", "user_id": 1024});
-let mut event = TelemetryEvent::new("device-host-001", GENESIS_HASH, payload).unwrap();
+// Bind device ID, monotonic sequence number, previous hash linkage, and payload
+let mut event = TelemetryEvent::new("device-host-001", 1, GENESIS_HASH, payload).unwrap();
 
-// Derive BEW Watermark binding current entropy and historical hash commitments
+// Derive BEW Watermark binding current behavior digest, previous hash, and unique nonce
 let snapshot = BehaviorSnapshot::capture().unwrap();
-let watermark = engine.derive(&snapshot, &event.prev_hash);
+let behavior_digest = snapshot.to_digest();
+let watermark = engine.derive(&behavior_digest, &event.prev_hash, &event.nonce).unwrap();
 event.set_watermark(watermark.into_bytes());
 
 // 3. Finalize Hash Linkage
@@ -168,3 +182,9 @@ chain.append(&event).unwrap();
 ## ⚖️ License
 
 This project is open-sourced under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for complete details and patent grant conditions.
+
+<br/>
+
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2b0000,50:520000,100:800000&height=180&section=footer&text=Securing%20Telemetry%20With%20Behavioral%20Entropy&fontSize=26&fontColor=ffffff&animation=fadeIn&fontAlignY=65" alt="Footer Wave" />
+</div>
