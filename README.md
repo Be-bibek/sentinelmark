@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:8b0000,100:ffa500&height=240&section=header&text=SentinelMark&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Cryptographic%20Trust%20Primitive%20%E2%80%A2%20Forensic%20Telemetry%20Engine&descAlignY=60&descSize=18" alt="SentinelMark Banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:ff0000,100:ff5f1f&height=240&section=header&text=SentinelMark&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Cryptographic%20Trust%20Primitive%20%E2%80%A2%20Forensic%20Telemetry%20Engine&descAlignY=60&descSize=18" alt="SentinelMark Banner" />
 </h1>
 
 <p align="center">
@@ -204,5 +204,5 @@ This project is open-sourced under the **Apache License 2.0**. See the [LICENSE]
 <br/>
 
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:8b0000,100:ffa500&height=180&section=footer&text=Securing%20Telemetry%20With%20Behavioral%20Entropy&fontSize=26&fontColor=ffffff&animation=fadeIn&fontAlignY=65" alt="Footer Wave" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:ff0000,100:ff5f1f&height=180&section=footer&text=Securing%20Telemetry%20With%20Behavioral%20Entropy&fontSize=26&fontColor=ffffff&animation=fadeIn&fontAlignY=65" alt="Footer Wave" />
 </div>
