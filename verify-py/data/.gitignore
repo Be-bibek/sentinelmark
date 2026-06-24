@@ -1,4 +1,0 @@
-# SQLite database files — excluded from git
-*.db
-*.db-shm
-*.db-wal

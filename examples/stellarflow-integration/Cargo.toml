@@ -1,0 +1,12 @@
+[package]
+name = "stellarflow-integration"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sentinelmark-rs = { workspace = true }
+sentinelmark-core = { workspace = true }
+telemetry-engine = { workspace = true }
+behavior-engine = { workspace = true }
+policy-engine = { workspace = true }
+chrono = { workspace = true }

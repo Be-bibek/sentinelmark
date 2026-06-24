@@ -15,13 +15,35 @@
   <img src="https://img.shields.io/badge/phase-3.1%20hardened-800000.svg?style=flat-square" alt="Phase" />
 </p>
 
-**SentinelMark** is the core cryptographic trust primitive and forensic telemetry subsystem for the **ProofTrace** cybersecurity infrastructure platform. It introduces a highly resilient, research-grade implementation of **Behavior-Entangled Watermarking (BEW)**.
+**SentinelMark** is a **Behavior-Aware Continuous Trust Infrastructure Platform**. What began as a cryptographic watermarking and forensic telemetry subsystem (v1) has evolved into a comprehensive security SDK (v2) designed for enterprise and fintech adoption.
 
-By cryptographically fusing long-term static hardware secrets with live, continuous behavioral entropy snapshots, SentinelMark ensures that emitted telemetry cannot be forged, replayed, or fabricated post-compromise.
+While traditional authentication systems ask *"Did the user log in?"*, SentinelMark asks: **"Can the user still be trusted right now?"** 
+
+By fusing long-term static hardware secrets with live, continuous behavioral entropy snapshots, SentinelMark ensures that emitted telemetry cannot be forged, replayed, or fabricated.
 
 ---
 
-## 🔬 Core Derivation Primitive
+## 🌟 SentinelMark v2: Continuous Trust Infrastructure SDK
+
+In **v2**, SentinelMark evolved into a pure, deterministic, blockchain-agnostic trust authorization layer. External systems (such as StellarFlow treasuries or enterprise identity gateways) consume SentinelMark to dynamically authorize high-value actions based on real-time behavior.
+
+The architecture is powered by 7 deterministic Rust engines:
+
+| Engine | Responsibility |
+|---|---|
+| **Identity Engine** | Detects impossible-travel, new device footprints, and credential reuse signals. |
+| **Workflow Engine** | Tracks session action sequences and detects anomalous workflow deviations. |
+| **Behavior Engine** | Maintains behavioral profiles (typical hours, geo-regions, transaction volumes). |
+| **Risk Engine** | Converts deviations into deterministic, weighted 0.0-1.0 Risk Assessments. |
+| **Trust Engine** | Inverts and scales risk into a dynamic Trust Score. |
+| **Policy Engine** | Enforces strict bounds (`Allow`, `RequireMFA`, `RequireApproval`, `Block`) + Multi-Sig. |
+| **Explainability Engine** | Generates human-readable, compliance-ready narratives for every decision. |
+
+> **Integration:** Deployed primarily as a **Rust SDK** (`sentinelmark-rs`), with a fully-featured **REST API Gateway** (Axum) acting as a deployment wrapper.
+
+---
+
+## 🔬 Core Derivation Primitive (v1 Legacy Foundation)
 
 <div align="center">
   <img src="assets/research_novelty.svg" alt="SentinelMark Research Novelty Assessment" width="800" />
@@ -152,7 +174,37 @@ python benchmarks/attacks/sim_latency.py          # Crypto latency baseline
 
 ---
 
-## 📜 Usage Example
+## 📜 Usage Example (v2 SDK)
+
+```rust
+use sentinelmark_rs::SentinelMark;
+use telemetry_engine::{TelemetryEvent, ActionType};
+
+// Initialize the continuous trust SDK
+let engine = SentinelMark::new();
+
+// A high-value treasury transfer is attempted from an unknown region
+let event = TelemetryEvent {
+    user_id: UserId("alice123".to_string()),
+    action_type: ActionType::Transaction,
+    transaction_amount: Some(50_000.0),
+    geo_region: "RU-Moscow".to_string(),
+    // ... timestamps, device_id, IP
+};
+
+// Evaluate trust deterministically against the user's historical profile
+let result = engine.evaluate(&event, &historical_profile);
+
+println!("Decision: {:?}", result.decision); 
+// Output: RequireApproval (Escalates to Multi-Sig)
+
+println!("Explanation: {}", result.explanation);
+// Output: "High risk (0.65). Significant behavioral anomalies detected."
+```
+
+---
+
+## 📜 Usage Example (v1 Core Engine)
 
 ```rust
 use sentinelmark_core::{

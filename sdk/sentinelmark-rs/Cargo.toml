@@ -1,0 +1,15 @@
+[package]
+name = "sentinelmark-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+tokio = { workspace = true }
+sentinelmark-core    = { workspace = true }
+telemetry-engine     = { workspace = true }
+behavior-engine      = { workspace = true }
+risk-engine          = { workspace = true }
+trust-engine         = { workspace = true }
+policy-engine        = { workspace = true }
+audit-engine         = { workspace = true }

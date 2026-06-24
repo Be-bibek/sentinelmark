@@ -1,0 +1,1 @@
+fn main() { println!("Banking platform boilerplate"); }

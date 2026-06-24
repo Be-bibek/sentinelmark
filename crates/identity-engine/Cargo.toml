@@ -1,0 +1,9 @@
+[package]
+name = "identity-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+chrono = { workspace = true }
+sentinelmark-core = { workspace = true }
