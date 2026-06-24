@@ -1,9 +1,9 @@
 <h1 align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:ff0000,100:ff5f1f&height=240&section=header&text=SentinelMark&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Cryptographic%20Trust%20Primitive%20%E2%80%A2%20Forensic%20Telemetry%20Engine&descAlignY=60&descSize=18" alt="SentinelMark Banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,50:ff0000,100:ff5f1f&height=240&section=header&text=SentinelMark&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Behavior-Aware%20Continuous%20Trust%20Infrastructure%20%E2%80%A2%20Security%20SDK&descAlignY=60&descSize=18" alt="SentinelMark Banner" />
 </h1>
 
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=38BDF8&center=true&vCenter=true&width=900&lines=Behavior-Entangled+Watermarking+(BEW);Monotonic+Causal+Ordering+Architecture;Crash-Resilient+Stateful+Replay+Defense;IEEE-Grade+Security+Research+System" alt="Typing SVG" /> 
+  <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=38BDF8&center=true&vCenter=true&width=900&lines=Continuous+Trust+Infrastructure+SDK;Deterministic+Behavioral+Risk+Scoring;Identity+&+Workflow+Anomaly+Detection;Enterprise-Grade+Security+Platform" alt="Typing SVG" /> 
 </p>
 
 <p align="center">
@@ -46,7 +46,7 @@ The architecture is powered by 7 deterministic Rust engines:
 ## 🔬 Core Derivation Primitive (v1 Legacy Foundation)
 
 <div align="center">
-  <img src="assets/research_novelty.svg" alt="SentinelMark Research Novelty Assessment" width="800" />
+  <img src="legacy/assets/research_novelty.svg" alt="SentinelMark Research Novelty Assessment" width="800" />
 </div>
 <br/>
 
@@ -66,7 +66,37 @@ Where:
 ## 🚀 Subsystem Architecture
 
 <div align="center">
-  <img src="assets/architecture_layers.svg" alt="SentinelMark Architecture Layers" width="800" />
+```mermaid
+flowchart TD
+    %% Define Styles
+    classDef default fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#fff;
+    classDef highlight fill:#0F172A,stroke:#F43F5E,stroke-width:3px,color:#fff;
+    classDef action fill:#064E3B,stroke:#10B981,stroke-width:2px,color:#fff;
+
+    subgraph Inputs ["Telemetry Ingestion (Sub-millisecond)"]
+        T(Telemetry Event) --> ID[Identity Engine]
+        T --> WF[Workflow Engine]
+    end
+
+    subgraph Profiling ["Behavioral Tracking"]
+        ID -->|Context| BE[Behavior Engine]
+        WF -->|Sequence| BE
+        DB[(Behavior Profiles)] -.->|Baseline| BE
+    end
+
+    subgraph Assessment ["Deterministic Evaluation"]
+        BE -->|Deviations| RE[Risk Engine]
+        RE -->|0.0-1.0 Score| TE[Trust Engine]
+        TE -->|Confidence| PE[Policy Engine]
+    end
+
+    subgraph Outputs ["Decision Enforcement"]
+        PE --> A[Allow]:::action
+        PE --> MFA[Require MFA]:::highlight
+        PE --> AP[Require Approval]:::highlight
+        PE --> B[Block]:::highlight
+    end
+```
 </div>
 <br/>
 
@@ -123,7 +153,13 @@ verify-py (Python Verification Authority)
 ## 📊 Performance & Security Trade-offs
 
 <div align="center">
-  <img src="assets/performance_tradeoffs.svg" alt="Rust vs Python vs C++ Performance Tradeoffs" width="800" />
+```mermaid
+xychart-beta
+    title "Execution Efficiency: Pure Rust Determinism vs AI/ML Inference (ms)"
+    x-axis ["SentinelMark (v2)", "Rules Engine (Java)", "ML Pipeline (Python)"]
+    y-axis "Latency (ms)" 0 --> 150
+    bar [0.8, 45, 120]
+```
 </div>
 
 ---
