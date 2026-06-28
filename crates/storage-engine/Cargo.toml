@@ -4,8 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sqlx = { workspace = true }
-tokio = { workspace = true }
+sqlx          = { workspace = true }
+tokio         = { workspace = true }
+serde         = { workspace = true }
+serde_json    = { workspace = true }
+uuid          = { workspace = true }
+chrono        = { workspace = true }
+thiserror     = { workspace = true }
+async-trait   = "0.1"
 sentinelmark-core = { workspace = true }
-audit-engine = { workspace = true }
-behavior-engine = { workspace = true }
+audit-engine      = { workspace = true }
+behavior-engine   = { workspace = true }
+policy-engine     = { workspace = true }

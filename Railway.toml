@@ -1,0 +1,17 @@
+﻿[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cargo run --release --bin api-gateway"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "api-gateway"
+
+[services.variables]
+RUST_LOG = "info"
+ENVIRONMENT = "production"
+AUTH_MODE = "disabled"

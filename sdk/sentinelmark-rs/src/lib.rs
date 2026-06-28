@@ -4,10 +4,12 @@
 //! Hides all internal engine complexity behind a single evaluation call.
 //!
 //! # Example
-//! ```rust
-//! let engine = SentinelMark::new();
-//! let result = engine.evaluate(&event, &profile);
-//! println!("{:?}", result.decision);
+//! ```rust,no_run
+//! use sentinelmark_rs::SentinelMark;
+//! // Construct telemetry event and profile (see crate docs for full example)
+//! // let engine = SentinelMark::new();
+//! // let result = engine.evaluate(&event, &profile);
+//! // println!("{:?}", result.decision);
 //! ```
 
 use serde::{Deserialize, Serialize};

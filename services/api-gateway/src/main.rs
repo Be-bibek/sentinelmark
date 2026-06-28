@@ -1,93 +1,237 @@
-//! SentinelMark v2 — API Gateway
-//!
-//! Axum-based REST gateway. This service is a deployment wrapper around
-//! the sentinelmark-rs SDK. All business logic lives in the SDK.
-//!
-//! Endpoints:
-//!   GET  /health                   — liveness probe
-//!   POST /evaluate                 — evaluate a telemetry event
-//!   POST /telemetry                — ingest raw telemetry
-//!   GET  /behavior-profile/:uid    — retrieve behavior profile (stub)
-//!   GET  /audit/:uid               — retrieve audit log (stub)
+mod config;
+mod error;
+mod response;
+mod state;
+mod ws;
+mod middleware;
+mod routes;
 
-use axum::{
-    routing::{get, post},
-    Router, Json,
-    http::StatusCode,
-    extract::{State, Path},
-};
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tracing::info;
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
+use tokio::sync::broadcast;
+use tokio::signal;
+use axum::{
+    Router,
+    routing::{get, post},
+};
+use tower_http::{
+    cors::{CorsLayer, Any},
+    trace::TraceLayer,
+    timeout::TimeoutLayer,
+    compression::CompressionLayer,
+    request_id::{SetRequestIdLayer, PropagateRequestIdLayer},
+};
+use axum::http::{HeaderName, Method};
+use std::time::Duration;
+use tracing::{info, error};
+use sqlx::postgres::PgPoolOptions;
 
-use sentinelmark_rs::{SentinelMark, EvaluationResult};
-use telemetry_engine::TelemetryEvent;
-use behavior_engine::BehaviorProfile;
-
-#[derive(Clone)]
-struct AppState {
-    engine: Arc<SentinelMark>,
-}
-
-#[derive(Deserialize)]
-struct EvaluateRequest {
-    event: TelemetryEvent,
-    profile: BehaviorProfile,
-}
-
-#[derive(Serialize)]
-struct HealthResponse {
-    status: &'static str,
-    version: &'static str,
-}
-
-async fn health() -> Json<HealthResponse> {
-    Json(HealthResponse { status: "ok", version: "2.0.0" })
-}
-
-async fn evaluate(
-    State(state): State<AppState>,
-    Json(payload): Json<EvaluateRequest>,
-) -> Result<Json<EvaluationResult>, StatusCode> {
-    info!(user_id = ?payload.event.user_id, "Evaluating trust for event");
-    let result = state.engine.evaluate(&payload.event, &payload.profile);
-    Ok(Json(result))
-}
-
-async fn get_telemetry() -> StatusCode {
-    // TODO: Persist telemetry event to storage-engine
-    StatusCode::ACCEPTED
-}
-
-async fn get_behavior_profile(Path(user_id): Path<String>) -> Json<serde_json::Value> {
-    info!(user_id = %user_id, "Fetching behavior profile");
-    // TODO: Wire to storage-engine ProfileRepository
-    Json(serde_json::json!({ "user_id": user_id, "status": "stub" }))
-}
-
-async fn get_audit(Path(user_id): Path<String>) -> Json<serde_json::Value> {
-    info!(user_id = %user_id, "Fetching audit log");
-    // TODO: Wire to storage-engine AuditRepository
-    Json(serde_json::json!({ "user_id": user_id, "entries": [] }))
-}
+use crate::config::Config;
+use crate::state::AppState;
+use crate::middleware::request_id::MakeUuidRequestId;
+use crate::ws::{ws_handler, WsEvent};
+use storage_engine::PostgresStorage;
+use sentinelmark_rs::SentinelMark;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    // ──────────────────────────────────────────────────────────────────────
+    // 1. Load configuration — fail fast if invalid
+    // ──────────────────────────────────────────────────────────────────────
+    let config = Config::from_env().unwrap_or_else(|e| {
+        eprintln!("FATAL: Configuration error: {e}");
+        std::process::exit(1);
+    });
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 2. Initialize structured tracing
+    // ──────────────────────────────────────────────────────────────────────
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(&config.rust_log));
+
+    if config.is_production() {
+        tracing_subscriber::fmt()
+            .json()
+            .with_env_filter(env_filter)
+            .init();
+    } else {
+        tracing_subscriber::fmt()
+            .pretty()
+            .with_env_filter(env_filter)
+            .init();
+    }
+
+    info!(
+        version = "2.0.0",
+        environment = ?config.environment,
+        port = config.port,
+        auth_mode = ?config.auth_mode,
+        "SentinelMark v2 API Gateway starting"
+    );
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 3. Connect to PostgreSQL with retry
+    // ──────────────────────────────────────────────────────────────────────
+    let pool = connect_with_retry(&config.database_url, 5).await;
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 4. Run database migrations automatically
+    // ──────────────────────────────────────────────────────────────────────
+    info!("Running database migrations...");
+    // Migrations are embedded at compile time from the workspace /migrations directory.
+    // Using sqlx::migrate::Migrator directly with path works at runtime.
+    sqlx::migrate!("../../migrations")
+        .run(&pool)
+        .await
+        .unwrap_or_else(|e| {
+            error!("Migration failed: {e}");
+            std::process::exit(1);
+        });
+    info!("Database migrations complete");
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 5. Initialize WebSocket broadcast channel
+    // ──────────────────────────────────────────────────────────────────────
+    let (ws_tx, _) = broadcast::channel::<WsEvent>(256);
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 6. Build application state
+    // ──────────────────────────────────────────────────────────────────────
+    let storage = Arc::new(PostgresStorage::new(pool.clone()));
+    let sdk = Arc::new(SentinelMark::new());
+    let config = Arc::new(config);
 
     let state = AppState {
-        engine: Arc::new(SentinelMark::new()),
+        config: config.clone(),
+        db: pool,
+        storage,
+        sdk,
+        ws_tx,
     };
 
-    let app = Router::new()
-        .route("/health",                    get(health))
-        .route("/evaluate",                  post(evaluate))
-        .route("/telemetry",                 post(get_telemetry))
-        .route("/behavior-profile/:user_id", get(get_behavior_profile))
-        .route("/audit/:user_id",            get(get_audit))
+    // ──────────────────────────────────────────────────────────────────────
+    // 7. Build CORS layer
+    // ──────────────────────────────────────────────────────────────────────
+    let allowed_origins: Vec<_> = config
+        .cors_allowed_origins
+        .iter()
+        .filter_map(|o| o.parse::<axum::http::HeaderValue>().ok())
+        .collect();
+
+    let cors = if allowed_origins.is_empty() {
+        CorsLayer::new().allow_methods(Any).allow_headers(Any)
+    } else {
+        CorsLayer::new()
+            .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+            .allow_headers(Any)
+            .allow_origin(allowed_origins)
+    };
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 8. Build router
+    // ──────────────────────────────────────────────────────────────────────
+    let x_request_id = HeaderName::from_static("x-request-id");
+
+    let api_v1 = Router::new()
+        // Health & infra
+        .route("/health/live",  get(routes::health::health_live))
+        .route("/health/ready", get(routes::health::health_ready))
+        .route("/version",      get(routes::version::version))
+        .route("/metrics",      get(routes::metrics::metrics))
+        // Core API
+        .route("/evaluate",                  post(routes::evaluate::evaluate))
+        .route("/telemetry",                 post(routes::telemetry::ingest_telemetry))
+        .route("/behavior-profile/:user_id", get(routes::behavior_profile::get_behavior_profile))
+        .route("/audit/:user_id",            get(routes::audit::get_audit))
+        // WebSocket
+        .route("/ws", get(ws_handler))
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    info!("SentinelMark v2 API Gateway listening on :3000");
-    axum::serve(listener, app).await.unwrap();
+    let app = Router::new()
+        .nest("/api/v1", api_v1)
+        // Fallback for bare /health for Railway healthchecks
+        .route("/health", get(|| async { "ok" }))
+        .layer(SetRequestIdLayer::new(x_request_id.clone(), MakeUuidRequestId))
+        .layer(PropagateRequestIdLayer::new(x_request_id))
+        .layer(TraceLayer::new_for_http())
+        .layer(CompressionLayer::new())
+        .layer(TimeoutLayer::new(Duration::from_secs(30)))
+        .layer(cors);
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 9. Bind and serve with graceful shutdown
+    // ──────────────────────────────────────────────────────────────────────
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
+    let listener = TcpListener::bind(addr).await.unwrap_or_else(|e| {
+        error!("Failed to bind to {addr}: {e}");
+        std::process::exit(1);
+    });
+
+    info!("SentinelMark v2 listening on http://{addr}");
+    info!("  → API:     http://{addr}/api/v1/health/live");
+    info!("  → WS:      ws://{addr}/api/v1/ws");
+    info!("  → Metrics: http://{addr}/metrics");
+
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap_or_else(|e| {
+            error!("Server error: {e}");
+            std::process::exit(1);
+        });
+
+    info!("SentinelMark v2 shut down gracefully");
+}
+
+/// Retry connecting to PostgreSQL with exponential backoff.
+async fn connect_with_retry(database_url: &str, max_retries: u32) -> sqlx::PgPool {
+    let mut attempts = 0;
+    loop {
+        match PgPoolOptions::new()
+            .max_connections(20)
+            .min_connections(2)
+            .acquire_timeout(Duration::from_secs(5))
+            .connect(database_url)
+            .await
+        {
+            Ok(pool) => {
+                info!("PostgreSQL connected successfully");
+                return pool;
+            }
+            Err(e) => {
+                attempts += 1;
+                if attempts >= max_retries {
+                    error!("Failed to connect to PostgreSQL after {max_retries} attempts: {e}");
+                    std::process::exit(1);
+                }
+                let delay = Duration::from_secs(2u64.pow(attempts));
+                error!("PostgreSQL connection attempt {attempts}/{max_retries} failed: {e}. Retrying in {delay:?}...");
+                tokio::time::sleep(delay).await;
+            }
+        }
+    }
+}
+
+/// Graceful shutdown: waits for CTRL+C or SIGTERM.
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c().await.expect("Failed to install CTRL+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("Failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => info!("Received CTRL+C, shutting down"),
+        _ = terminate => info!("Received SIGTERM, shutting down"),
+    }
 }

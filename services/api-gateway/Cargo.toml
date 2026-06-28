@@ -1,15 +1,34 @@
 [package]
 name = "api-gateway"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2021"
 
+[[bin]]
+name = "api-gateway"
+path = "src/main.rs"
+
 [dependencies]
-tokio = { workspace = true }
-axum = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-tracing = { workspace = true }
+sentinelmark-rs      = { workspace = true }
+storage-engine       = { workspace = true }
+telemetry-engine     = { workspace = true }
+behavior-engine      = { workspace = true }
+audit-engine         = { workspace = true }
+policy-engine        = { workspace = true }
+sentinelmark-core    = { workspace = true }
+tokio        = { workspace = true }
+axum         = { workspace = true }
+tower        = { workspace = true }
+tower-http   = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+sqlx         = { workspace = true }
+tracing      = { workspace = true }
 tracing-subscriber = { workspace = true }
-sentinelmark-rs = { workspace = true }
-telemetry-engine = { workspace = true }
-behavior-engine = { workspace = true }
+uuid         = { workspace = true }
+chrono       = { workspace = true }
+thiserror    = { workspace = true }
+dotenvy      = { workspace = true }
+validator    = { workspace = true }
+jsonwebtoken = { workspace = true }
+utoipa            = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
