@@ -1,6 +1,7 @@
 FROM rust:1-slim-bullseye AS builder
 
 WORKDIR /app
+RUN apt-get update && apt-get install -y curl unzip pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN cargo build --release -p api-gateway
 
