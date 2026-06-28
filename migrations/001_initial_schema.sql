@@ -1,4 +1,4 @@
-﻿-- SentinelMark v2 — Initial Database Schema
+-- SentinelMark v2 — Initial Database Schema
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 

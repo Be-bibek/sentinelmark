@@ -5,11 +5,14 @@ import { motion, useMotionValue, useSpring, useTransform, animate } from "motion
 import { Shield, ShieldAlert, Zap, Activity } from "lucide-react";
 import StarBorder from "./StarBorder";
 
+import { SystemMetrics } from "@/lib/api";
+
 interface KPICardsProps {
   score: number;
   anomaliesCount: number;
   policy: "ALLOW" | "MFA" | "MULTI-SIG" | "BLOCK";
   theme?: "light" | "dark";
+  metrics?: SystemMetrics;
 }
 
 // Sub-component to smoothly animate integer numbers
@@ -105,7 +108,7 @@ function AnimatedText({ value }: { value: string }) {
   );
 }
 
-export default function KPICards({ score, anomaliesCount, policy, theme = "dark" }: KPICardsProps) {
+export default function KPICards({ score, anomaliesCount, policy, theme = "dark", metrics }: KPICardsProps) {
   const isDark = theme === "dark";
 
   // Accent colors for different states depending on the active mode (Light vs Dark)
@@ -155,13 +158,13 @@ export default function KPICards({ score, anomaliesCount, policy, theme = "dark"
       desc: "Security enforcement model",
     },
     {
-      id: "system-health",
-      title: "System Health",
-      element: <AnimatedFloat value={99.98} suffix="%" />,
+      id: "active-sessions",
+      title: "Active Sessions",
+      element: <AnimatedNumber value={metrics?.active_sessions || 142} />,
       icon: Activity,
       color: isDark ? "text-emerald-400" : "text-emerald-600",
       glowColor: "rgba(16, 185, 129, 0.1)",
-      desc: "Continuous ingress uptime",
+      desc: "Currently authenticated nodes",
     },
   ];
 

@@ -12,13 +12,12 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-import { Providers } from "@/components/Providers";
-import { Sidebar } from "@/components/Sidebar";
-
 export const metadata: Metadata = {
-  title: "SentinelMark SOC Console",
+  title: "Trust Operations Center",
   description: "Continuous adaptive trust evaluation & incident response panel",
 };
+
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,
@@ -26,13 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="bg-background text-foreground antialiased selection:bg-emerald-500/20 selection:text-emerald-300 h-screen w-screen overflow-hidden flex">
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark`}>
+      <body className="bg-[#030303] text-zinc-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
         <Providers>
-          <Sidebar />
-          <main className="flex-1 h-full overflow-y-auto bg-background/50">
-            {children}
-          </main>
+          {children}
         </Providers>
       </body>
     </html>
