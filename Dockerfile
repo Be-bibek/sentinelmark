@@ -1,4 +1,4 @@
-FROM rust:1.80-slim-bullseye as builder
+FROM rust:1-slim-bullseye AS builder
 
 WORKDIR /app
 COPY . .
