@@ -143,7 +143,7 @@ export default function DashboardKPIs() {
       {kpis.map((kpi, i) => (
         <div
           key={i}
-          className="bg-[#0c0c0c] border border-white/5 rounded-xl p-4 flex flex-col justify-between group hover:border-white/10 transition-colors"
+          className="dark:bg-[#0c0c0c] bg-white border dark:border-white/5 border-zinc-200 rounded-xl p-4 flex flex-col justify-between group dark:hover:border-white/10 hover:border-zinc-300 transition-colors shadow-sm"
         >
           <div className="flex justify-between items-start mb-3">
             <div className={`p-2 rounded-lg ${kpi.bg}`}>

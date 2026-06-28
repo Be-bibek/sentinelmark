@@ -23,26 +23,26 @@ export default function LiveEventCenter() {
   }, [filteredLogs.length, isPaused]);
 
   return (
-    <div className="flex flex-col h-full bg-black/40 border-l border-white/5 w-80">
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
+    <div className="flex flex-col h-full dark:bg-black/40 bg-white/60 backdrop-blur-md border-l dark:border-white/5 border-zinc-200 w-80">
+      <div className="p-4 border-b dark:border-white/5 border-zinc-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-blue-400" />
-          <h2 className="text-sm font-semibold text-white">Live Event Center</h2>
+          <h2 className="text-sm font-semibold dark:text-white text-zinc-900">Live Event Center</h2>
         </div>
         <button 
           onClick={togglePause}
-          className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+          className="p-1.5 dark:hover:bg-white/10 hover:bg-zinc-100 rounded-md transition-colors"
           title={isPaused ? "Resume Stream" : "Pause Stream"}
         >
           {isPaused ? <Play className="w-4 h-4 text-emerald-400" /> : <Pause className="w-4 h-4 text-zinc-400" />}
         </button>
       </div>
 
-      <div className="p-2 border-b border-white/5 flex gap-2">
+      <div className="p-2 border-b dark:border-white/5 border-zinc-200 flex gap-2">
         <select 
           value={filterLevel}
           onChange={(e) => setFilter(e.target.value as any)}
-          className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-zinc-300 w-full outline-none"
+          className="dark:bg-white/5 bg-zinc-50 border dark:border-white/10 border-zinc-200 rounded px-2 py-1 text-xs dark:text-zinc-300 text-zinc-700 w-full outline-none"
         >
           <option value="all">All Events</option>
           <option value="warning">Warnings Only</option>
@@ -62,7 +62,7 @@ export default function LiveEventCenter() {
                 log.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-200' :
                 log.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
                 log.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' :
-                'bg-white/5 border-white/10 text-zinc-300'
+                'dark:bg-white/5 bg-zinc-50 dark:border-white/10 border-zinc-200 dark:text-zinc-300 text-zinc-700'
               }`}
             >
               <div className="flex justify-between items-start mb-1 opacity-70">

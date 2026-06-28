@@ -194,7 +194,7 @@ export default function AttackReplay({ theme = "dark" }: AttackReplayProps) {
                   className={`p-3 rounded-xl border transition-all duration-300 flex items-center justify-between ${
                     isCurrent
                       ? isDark
-                        ? "bg-zinc-900 border-zinc-700 shadow-lg text-white"
+                        ? "bg-zinc-900 border-zinc-700 shadow-lg dark:text-white text-zinc-900"
                         : "bg-white border-zinc-300 text-zinc-950 font-bold shadow-sm"
                       : isPast
                       ? isDark
@@ -230,7 +230,7 @@ export default function AttackReplay({ theme = "dark" }: AttackReplayProps) {
             disabled={currentStepIdx === 0}
             className={`w-9 h-9 flex items-center justify-center rounded-xl border disabled:opacity-30 ${
               isDark 
-                ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" 
+                ? "dark:bg-white/5 bg-zinc-50 dark:border-white/10 border-zinc-200 hover:bg-white/10 dark:text-white text-zinc-900" 
                 : "bg-white border-zinc-200 hover:bg-zinc-100 text-zinc-700"
             }`}
           >
@@ -263,7 +263,7 @@ export default function AttackReplay({ theme = "dark" }: AttackReplayProps) {
             disabled={currentStepIdx === replaySequence.length - 1}
             className={`w-9 h-9 flex items-center justify-center rounded-xl border disabled:opacity-30 ${
               isDark 
-                ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" 
+                ? "dark:bg-white/5 bg-zinc-50 dark:border-white/10 border-zinc-200 hover:bg-white/10 dark:text-white text-zinc-900" 
                 : "bg-white border-zinc-200 hover:bg-zinc-100 text-zinc-700"
             }`}
           >
@@ -276,7 +276,7 @@ export default function AttackReplay({ theme = "dark" }: AttackReplayProps) {
             onClick={handleReset}
             className={`w-9 h-9 flex items-center justify-center rounded-xl border ${
               isDark 
-                ? "bg-white/5 border-white/10 hover:bg-white/10 text-white" 
+                ? "dark:bg-white/5 bg-zinc-50 dark:border-white/10 border-zinc-200 hover:bg-white/10 dark:text-white text-zinc-900" 
                 : "bg-white border-zinc-200 hover:bg-zinc-100 text-zinc-700"
             }`}
           >

@@ -214,12 +214,12 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
   const idle      = Object.values(checks).every((s) => s === "idle");
 
   return (
-    <div className={`p-5 rounded-xl border bg-white/5 transition-all duration-300 relative overflow-hidden ${
+    <div className={`p-5 rounded-xl border dark:bg-white/5 bg-zinc-50 transition-all duration-300 relative overflow-hidden ${
       isExecuting
         ? "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
         : allPassed ? "border-emerald-500/30"
         : anyFailed ? "border-red-500/30"
-        : "border-white/10 hover:border-white/20"
+        : "dark:border-white/10 border-zinc-200 hover:border-white/20"
     }`}>
       {/* Execution progress bar */}
       {isExecuting && (
@@ -230,7 +230,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
 
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
-        <h3 className="font-bold text-white text-sm flex items-center gap-2">
+        <h3 className="font-bold dark:text-white text-zinc-900 text-sm flex items-center gap-2">
           <Icon className="w-4 h-4 text-blue-400" />
           {scenario.title}
         </h3>
@@ -249,7 +249,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
 
       {/* Validation checklist */}
       {!idle && (
-        <div className="mb-5 space-y-1.5 p-3 bg-black/40 rounded-lg border border-white/5">
+        <div className="mb-5 space-y-1.5 p-3 bg-black/40 rounded-lg border dark:border-white/5 border-zinc-200">
           {(Object.keys(CHECK_LABELS) as (keyof ValidationChecks)[]).map((key) => (
             <div key={key} className="flex items-center justify-between">
               <span className="text-[11px] text-zinc-400 flex items-center gap-1.5">
@@ -264,7 +264,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
 
       {/* Last result trace */}
       {hasResult && !isExecuting && (
-        <div className="mb-5 p-3 bg-black/40 rounded-lg border border-white/5 space-y-1">
+        <div className="mb-5 p-3 bg-black/40 rounded-lg border dark:border-white/5 border-zinc-200 space-y-1">
           {lastResult.requestId && (
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Request ID</span>
@@ -295,7 +295,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
       <button
         onClick={executeAttack}
         disabled={isExecuting}
-        className="w-full py-2.5 bg-white/10 hover:bg-blue-600 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-white/5 hover:border-transparent disabled:opacity-60 disabled:pointer-events-none group/btn"
+        className="w-full py-2.5 bg-white/10 hover:bg-blue-600 dark:text-white text-zinc-900 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border dark:border-white/5 border-zinc-200 hover:border-transparent disabled:opacity-60 disabled:pointer-events-none group/btn"
       >
         {isExecuting ? (
           <span className="flex items-center gap-2 animate-pulse">
