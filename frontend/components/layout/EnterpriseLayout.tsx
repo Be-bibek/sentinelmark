@@ -55,8 +55,8 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
     }`}>
       {/* Dynamic Backgrounds */}
       <ParticleBackground policyState="ALLOW" theme={currentTheme as "light" | "dark"} />
-      <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
-        <Strands colors={["#F97316", "#7C3AED", "#06B6D4"]} count={2} speed={0.5} />
+      <div className={`absolute inset-0 z-0 pointer-events-none transition-opacity duration-500 ${isDark ? "opacity-30" : "opacity-60"}`}>
+        <Strands colors={isDark ? ["#F97316", "#7C3AED", "#06B6D4"] : ["#EA580C", "#6D28D9", "#0891B2"]} count={2} speed={0.5} />
       </div>
 
       <div className="relative z-10 flex w-full h-full">

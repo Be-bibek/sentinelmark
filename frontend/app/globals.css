@@ -61,12 +61,12 @@
 @layer components {
   /* Master Card Container */
   .ui-card {
-    @apply dark:bg-black/40 bg-white/60 backdrop-blur-xl border dark:border-white/10 border-zinc-200/80 rounded-xl shadow-sm transition-all duration-300;
+    @apply dark:bg-black/40 bg-white/40 backdrop-blur-xl border dark:border-white/10 border-zinc-200/80 rounded-xl shadow-sm transition-all duration-300;
   }
   
   /* Nested Panel / Item Container */
   .ui-subcard {
-    @apply dark:bg-black/40 bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3;
+    @apply dark:bg-black/40 bg-white/30 backdrop-blur-md border dark:border-white/5 border-zinc-200 rounded-lg p-3;
   }
   
   /* Standard Input / Search Field */

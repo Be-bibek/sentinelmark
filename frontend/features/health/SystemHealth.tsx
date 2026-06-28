@@ -35,7 +35,7 @@ function MetricTile({
     unknown:  "text-zinc-400   bg-zinc-500/10",
   };
   return (
-    <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm">
+    <div className="ui-card !p-4 flex flex-col gap-3 shadow-sm">
       <div className="flex items-center justify-between">
         <div className={`p-2 rounded-lg ${statusColors[status]}`}>
           <Icon className="w-4 h-4" />
@@ -72,7 +72,7 @@ function ApiDiagnosticsTable() {
   };
 
   return (
-    <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg">
+    <div className="ui-card p-5">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-bold dark:text-white text-zinc-900 mb-1">API Request Log</h3>
