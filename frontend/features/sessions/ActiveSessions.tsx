@@ -47,15 +47,15 @@ export default function ActiveSessions() {
   return (
     <div className="space-y-4">
       {sessions.map((session) => (
-        <div key={session.id} className="bg-[#0c0c0c] border border-white/10 rounded-xl p-5 flex items-center justify-between group hover:border-white/20 transition-colors">
+        <div key={session.id} className="dark:bg-[#0c0c0c] bg-white shadow-sm border dark:border-white/10 border-zinc-200 rounded-xl p-5 flex items-center justify-between group dark:hover:border-white/20 hover:border-zinc-300 transition-colors">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-              {session.deviceType === 'desktop' ? <Laptop className="w-6 h-6 text-zinc-400" /> : <Smartphone className="w-6 h-6 text-zinc-400" />}
+            <div className="w-12 h-12 dark:bg-white/5 bg-zinc-100 rounded-full flex items-center justify-center border dark:border-white/10 border-zinc-200">
+              {session.deviceType === 'desktop' ? <Laptop className="w-6 h-6 dark:text-zinc-400 text-zinc-500" /> : <Smartphone className="w-6 h-6 dark:text-zinc-400 text-zinc-500" />}
             </div>
             
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-white text-sm">{session.device}</span>
+                <span className="font-bold dark:text-white text-zinc-900 text-sm">{session.device}</span>
                 {session.live && <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold uppercase"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live</span>}
                 {!session.live && <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold uppercase">Terminated</span>}
               </div>
@@ -89,11 +89,11 @@ export default function ActiveSessions() {
               </span>
             </div>
 
-            <div className="pl-4 border-l border-white/5">
+            <div className="pl-4 border-l dark:border-white/5 border-zinc-200">
               <button 
                 onClick={() => terminateSession(session.id)}
                 disabled={!session.live}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:border-transparent text-red-400 text-xs font-bold uppercase border border-red-500/20 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 disabled:dark:bg-zinc-800 disabled:bg-zinc-100 disabled:dark:text-zinc-600 disabled:text-zinc-400 disabled:border-transparent text-red-400 text-xs font-bold uppercase border border-red-500/20 rounded-lg transition-colors"
               >
                 <TerminalSquare className="w-4 h-4" />
                 {session.live ? 'Terminate' : 'Revoked'}

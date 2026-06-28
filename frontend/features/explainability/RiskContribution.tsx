@@ -3,6 +3,7 @@
 import React from "react";
 import { useTrustStore } from "@/stores/trust-store";
 import { ShieldCheck, ShieldAlert, ArrowRight, BrainCircuit, Workflow, Fingerprint } from "lucide-react";
+import { Card } from "@/components/ui/Card";
 
 export default function RiskContribution() {
   const { currentScore, decision, anomalies } = useTrustStore();
@@ -47,27 +48,27 @@ export default function RiskContribution() {
   const contributions = getContributions();
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/5 rounded-2xl overflow-hidden flex flex-col h-full relative">
-      <div className="p-5 border-b border-white/5 bg-black/40 flex items-center justify-between">
+    <Card className="overflow-hidden flex flex-col h-full relative">
+      <div className="p-5 border-b dark:border-white/5 border-zinc-200 dark:bg-black/40 bg-zinc-50/80 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white mb-1">Explainability Studio</h2>
+          <h2 className="text-lg font-bold dark:text-white text-zinc-900 mb-1">Explainability Studio</h2>
           <p className="text-xs text-zinc-400">Deterministic trace for Evaluation #48192</p>
         </div>
         <div className="flex gap-2 text-[10px] uppercase font-mono tracking-wider">
-          <span className="px-2 py-1 bg-white/5 rounded border border-white/10 text-blue-400">Deterministic</span>
-          <span className="px-2 py-1 bg-white/5 rounded border border-white/10 text-purple-400">Trace Active</span>
+          <span className="px-2 py-1 dark:bg-white/5 bg-zinc-100 rounded border dark:border-white/10 border-zinc-200 text-blue-400">Deterministic</span>
+          <span className="px-2 py-1 dark:bg-white/5 bg-zinc-100 rounded border dark:border-white/10 border-zinc-200 text-purple-400">Trace Active</span>
         </div>
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto">
-        <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between">
+        <div className="mb-8 p-4 dark:bg-white/5 bg-zinc-50 rounded-xl border dark:border-white/5 border-zinc-200 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/30">
               <BrainCircuit className="w-5 h-5 text-blue-400" />
             </div>
             <div>
               <p className="text-xs text-zinc-500 font-mono mb-1">FINAL SCORE CALCULATION</p>
-              <p className="text-3xl font-extrabold text-white">{currentScore}</p>
+              <p className="text-3xl font-extrabold dark:text-white text-zinc-900">{currentScore}</p>
             </div>
           </div>
           <ArrowRight className="w-5 h-5 text-zinc-600" />
@@ -88,20 +89,20 @@ export default function RiskContribution() {
           </div>
         </div>
 
-        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4 flex items-center gap-2">
           <Workflow className="w-4 h-4 text-zinc-400" />
           Risk Contributions
         </h3>
 
         <div className="space-y-2 font-mono text-sm">
           {contributions.map((item, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-transparent hover:border-white/5">
+            <div key={i} className="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-zinc-50 dark:hover:bg-white/10 hover:bg-zinc-100 transition-colors border border-transparent dark:hover:border-white/5 hover:border-zinc-200">
               <div className="flex items-center gap-3">
                 <span className={`w-2 h-2 rounded-full ${
                   item.type === 'base' ? 'bg-blue-500' :
                   item.type === 'bonus' ? 'bg-emerald-500' : 'bg-red-500'
                 }`}></span>
-                <span className="text-zinc-300">{item.name}</span>
+                <span className="dark:text-zinc-300 text-zinc-700">{item.name}</span>
               </div>
               <span className={`font-bold ${
                   item.type === 'base' ? 'text-blue-400' :
@@ -111,12 +112,12 @@ export default function RiskContribution() {
               </span>
             </div>
           ))}
-          <div className="pt-4 mt-2 border-t border-white/10 flex justify-between items-center text-white font-bold px-3">
+          <div className="pt-4 mt-2 border-t dark:border-white/10 border-zinc-200 flex justify-between items-center dark:text-white text-zinc-900 font-bold px-3">
             <span>FINAL TRUST SCORE</span>
             <span className="text-xl text-blue-400">{currentScore}</span>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

@@ -35,7 +35,7 @@ function MetricTile({
     unknown:  "text-zinc-400   bg-zinc-500/10",
   };
   return (
-    <div className="bg-[#0c0c0c] border border-white/10 rounded-xl p-4 flex flex-col gap-3">
+    <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm">
       <div className="flex items-center justify-between">
         <div className={`p-2 rounded-lg ${statusColors[status]}`}>
           <Icon className="w-4 h-4" />
@@ -51,7 +51,7 @@ function MetricTile({
         )}
       </div>
       <div>
-        <div className="text-lg font-bold text-white truncate">{value}</div>
+        <div className="text-lg font-bold dark:text-white text-zinc-900 truncate">{value}</div>
         <div className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">{label}</div>
         {subValue && <div className="text-[10px] text-zinc-600 mt-0.5 font-mono">{subValue}</div>}
       </div>
@@ -72,10 +72,10 @@ function ApiDiagnosticsTable() {
   };
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg">
+    <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-bold text-white mb-1">API Request Log</h3>
+          <h3 className="text-sm font-bold dark:text-white text-zinc-900 mb-1">API Request Log</h3>
           <p className="text-xs text-zinc-500">Last {entries.length} requests captured by the interceptor</p>
         </div>
         <div className="flex gap-4 text-right">
@@ -89,7 +89,7 @@ function ApiDiagnosticsTable() {
           </div>
           <div>
             <div className="text-xs text-zinc-500">Total</div>
-            <div className="text-sm font-bold text-zinc-300 font-mono">{totalRequests}</div>
+            <div className="text-sm font-bold dark:text-zinc-300 text-zinc-700 font-mono">{totalRequests}</div>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ function ApiDiagnosticsTable() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="border-b border-white/5 text-[10px] uppercase tracking-wider text-zinc-500">
+            <thead className="border-b dark:border-white/5 border-zinc-200 text-[10px] uppercase tracking-wider text-zinc-500">
               <tr>
                 <th className="pb-2 pr-4">Method</th>
                 <th className="pb-2 pr-4">Endpoint</th>
@@ -110,16 +110,16 @@ function ApiDiagnosticsTable() {
                 <th className="pb-2">cURL</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y dark:divide-white/5 divide-zinc-200">
               {entries.slice(0, 20).map((entry) => (
-                <tr key={entry.id} className="group hover:bg-white/[0.02]">
+                <tr key={entry.id} className="group dark:hover:bg-white/[0.02] hover:bg-zinc-50">
                   <td className="py-2 pr-4">
                     <span className={`font-mono font-bold ${
                       entry.method === "POST" ? "text-blue-400" :
                       entry.method === "GET"  ? "text-emerald-400" : "text-zinc-400"
                     }`}>{entry.method}</span>
                   </td>
-                  <td className="py-2 pr-4 font-mono text-zinc-300 max-w-[200px] truncate">{entry.endpoint}</td>
+                  <td className="py-2 pr-4 font-mono dark:text-zinc-300 text-zinc-700 max-w-[200px] truncate">{entry.endpoint}</td>
                   <td className="py-2 pr-4">
                     <span className={`font-mono font-bold ${
                       entry.statusCode < 300 ? "text-emerald-400" :
@@ -132,7 +132,7 @@ function ApiDiagnosticsTable() {
                   <td className="py-2">
                     <button
                       onClick={() => copyAsCurl(entry.curlCommand, entry.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 dark:hover:bg-white/10 hover:bg-zinc-200 rounded transition-all"
                       title="Copy as cURL"
                     >
                       {copied === entry.id

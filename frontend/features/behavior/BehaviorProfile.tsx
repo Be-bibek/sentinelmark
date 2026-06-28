@@ -6,6 +6,7 @@ import BehaviorHeatmap from "@/features/charts/BehaviorHeatmap";
 import { Laptop, Globe, Clock, MousePointer2, Keyboard, ShieldAlert, Smartphone } from "lucide-react";
 import { SentinelAPI } from "@/lib/api";
 import { DataSourceBadge, type DataSource } from "@/components/ui/DataSourceBadge";
+import { Card } from "@/components/ui/Card";
 
 const USER_ID = "dev.ops@enterprise.com";
 
@@ -48,69 +49,69 @@ export default function BehaviorProfile() {
         
         {/* Left Column - Key Identity Baselines */}
         <div className="space-y-6">
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg">
-            <h3 className="text-sm font-semibold text-white mb-4">Device Baseline</h3>
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4">Device Baseline</h3>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+              <div className="flex items-start gap-3 p-3 dark:bg-white/5 bg-zinc-50 rounded-lg border dark:border-white/5 border-zinc-200">
                 <Laptop className="w-5 h-5 text-emerald-400 mt-0.5" />
                 <div>
-                  <div className="text-sm text-zinc-200">MacBook Pro (M2)</div>
+                  <div className="text-sm dark:text-zinc-200 text-zinc-800">MacBook Pro (M2)</div>
                   <div className="text-xs text-zinc-500 font-mono mt-1">Chrome 120.0.0.0 • macOS</div>
                   <div className="text-[10px] bg-emerald-500/20 text-emerald-400 inline-block px-1.5 py-0.5 rounded mt-2 font-bold">PRIMARY DEVICE</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-white/5 rounded-lg border border-white/5 opacity-50">
+              <div className="flex items-start gap-3 p-3 dark:bg-white/5 bg-zinc-50 rounded-lg border dark:border-white/5 border-zinc-200 opacity-50 hover:opacity-100 transition-opacity">
                 <Laptop className="w-5 h-5 text-zinc-400 mt-0.5" />
                 <div>
-                  <div className="text-sm text-zinc-200">iPhone 14 Pro</div>
+                  <div className="text-sm dark:text-zinc-200 text-zinc-800">iPhone 14 Pro</div>
                   <div className="text-xs text-zinc-500 font-mono mt-1">Safari 17.0 • iOS</div>
-                  <div className="text-[10px] bg-zinc-500/20 text-zinc-400 inline-block px-1.5 py-0.5 rounded mt-2 font-bold">SECONDARY DEVICE</div>
+                  <div className="text-[10px] dark:bg-zinc-500/20 bg-zinc-200 dark:text-zinc-400 text-zinc-500 inline-block px-1.5 py-0.5 rounded mt-2 font-bold">SECONDARY DEVICE</div>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg">
-            <h3 className="text-sm font-semibold text-white mb-4">Behavioral Biometrics</h3>
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4">Behavioral Biometrics</h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+              <div className="flex justify-between items-center pb-2 border-b dark:border-white/5 border-zinc-200">
                 <div className="flex items-center gap-2">
                   <Keyboard className="w-4 h-4 text-zinc-400" />
-                  <span className="text-sm text-zinc-300">Keystroke Dynamics</span>
+                  <span className="text-sm dark:text-zinc-300 text-zinc-700">Keystroke Dynamics</span>
                 </div>
                 <span className="text-sm text-emerald-400 font-mono">98% Match</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+              <div className="flex justify-between items-center pb-2 border-b dark:border-white/5 border-zinc-200">
                 <div className="flex items-center gap-2">
                   <MousePointer2 className="w-4 h-4 text-zinc-400" />
-                  <span className="text-sm text-zinc-300">Cursor Velocity</span>
+                  <span className="text-sm dark:text-zinc-300 text-zinc-700">Cursor Velocity</span>
                 </div>
                 <span className="text-sm text-emerald-400 font-mono">94% Match</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+              <div className="flex justify-between items-center pb-2 border-b dark:border-white/5 border-zinc-200">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-zinc-400" />
-                  <span className="text-sm text-zinc-300">Session Duration</span>
+                  <span className="text-sm dark:text-zinc-300 text-zinc-700">Session Duration</span>
                 </div>
                 <span className="text-sm text-amber-400 font-mono">Anomaly (+40m)</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-zinc-400" />
-                  <span className="text-sm text-zinc-300">Geo-Velocity</span>
+                  <span className="text-sm dark:text-zinc-300 text-zinc-700">Geo-Velocity</span>
                 </div>
                 <span className="text-sm text-emerald-400 font-mono">Normal</span>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Right Column - Heatmap */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col min-h-[400px]">
+          <Card className="p-5 flex flex-col min-h-[400px]">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">7-Day Activity Heatmap</h3>
+                <h3 className="text-sm font-semibold dark:text-white text-zinc-900">7-Day Activity Heatmap</h3>
                 <p className="text-xs text-zinc-500 mt-1">Displays frequency of authentication and session events.</p>
               </div>
               <div className="flex gap-2">
@@ -129,7 +130,7 @@ export default function BehaviorProfile() {
             <div className="flex-1 w-full min-h-[300px]">
               {heatmapData.length > 0 && <BehaviorHeatmap data={heatmapData} />}
             </div>
-          </div>
+          </Card>
           
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 shadow-lg flex items-start gap-4">
             <div className="p-3 bg-red-500/20 rounded-full shrink-0">
