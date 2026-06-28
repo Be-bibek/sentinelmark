@@ -1,0 +1,6 @@
+{
+  "name": "SentinelMark TrustOS",
+  "description": "Enterprise Security Operations Center (SOC) Console and Identity Trust Platform",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
