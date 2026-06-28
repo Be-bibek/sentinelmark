@@ -52,7 +52,7 @@ export default function ApiExplorer() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[700px]">
       
       {/* Left Pane - Request */}
-      <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg flex flex-col">
+      <div className="ui-card p-5 flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <span className="bg-emerald-500/10 text-emerald-400 font-mono text-xs font-bold px-2 py-1 rounded">POST</span>
@@ -70,7 +70,7 @@ export default function ApiExplorer() {
         <div className="space-y-4 flex-1">
           <div>
             <h4 className="text-xs font-semibold text-zinc-500 uppercase mb-2">Headers</h4>
-            <div className="dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3 font-mono text-xs space-y-1">
+            <div className="ui-subcard font-mono text-xs space-y-1">
               <div><span className="text-blue-400">Authorization:</span> <span className="text-green-400">Bearer sm_live_12345</span></div>
               <div><span className="text-blue-400">Content-Type:</span> <span className="text-green-400">application/json</span></div>
             </div>
@@ -81,7 +81,7 @@ export default function ApiExplorer() {
             <textarea 
               readOnly 
               value={payload}
-              className="w-full flex-1 dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3 font-mono text-xs text-green-400 outline-none resize-none"
+              className="ui-subcard w-full flex-1 font-mono text-xs text-green-400 outline-none resize-none"
             />
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ApiExplorer() {
       </div>
 
       {/* Right Pane - Response */}
-      <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg flex flex-col">
+      <div className="ui-card p-5 flex flex-col">
         <div className="flex items-center justify-between mb-6 pb-2 border-b dark:border-white/5 border-zinc-200">
           <h3 className="font-semibold dark:text-white text-zinc-900">Response</h3>
           {response && (
@@ -106,7 +106,7 @@ export default function ApiExplorer() {
           )}
         </div>
 
-        <div className="flex-1 dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg overflow-hidden relative">
+        <div className="flex-1 ui-subcard !p-0 overflow-hidden relative">
           {executing ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex gap-2">

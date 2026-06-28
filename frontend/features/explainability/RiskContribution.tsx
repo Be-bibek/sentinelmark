@@ -61,7 +61,7 @@ export default function RiskContribution() {
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto">
-        <div className="mb-8 p-4 dark:bg-white/5 bg-zinc-50 rounded-xl border dark:border-white/5 border-zinc-200 flex items-center justify-between">
+        <div className="mb-8 ui-subcard flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/30">
               <BrainCircuit className="w-5 h-5 text-blue-400" />
@@ -96,7 +96,7 @@ export default function RiskContribution() {
 
         <div className="space-y-2 font-mono text-sm">
           {contributions.map((item, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-zinc-50 dark:hover:bg-white/10 hover:bg-zinc-100 transition-colors border border-transparent dark:hover:border-white/5 hover:border-zinc-200">
+            <div key={i} className="flex items-center justify-between ui-subcard dark:hover:bg-white/10 hover:bg-zinc-100 transition-colors dark:hover:border-white/5 hover:border-zinc-200">
               <div className="flex items-center gap-3">
                 <span className={`w-2 h-2 rounded-full ${
                   item.type === 'base' ? 'bg-blue-500' :

@@ -46,7 +46,7 @@ export default function SdkPlayground() {
   };
 
   return (
-    <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl shadow-lg flex flex-col h-[700px] overflow-hidden">
+    <div className="ui-card flex flex-col h-[700px] overflow-hidden">
       
       {/* Tabs */}
       <div className="flex border-b dark:border-white/5 border-zinc-200 dark:bg-black/40 bg-zinc-50/80 px-2 pt-2 gap-1 overflow-x-auto">
@@ -70,7 +70,7 @@ export default function SdkPlayground() {
         {/* Install Section */}
         <div>
           <h3 className="dark:text-white text-zinc-900 font-bold mb-3 flex items-center gap-2"><Package className="w-4 h-4 text-emerald-400"/> Installation</h3>
-          <div className="flex items-center justify-between dark:bg-black bg-zinc-50 border dark:border-white/10 border-zinc-200 rounded-lg p-4">
+          <div className="ui-subcard flex items-center justify-between p-4">
             <code className="text-emerald-400 font-mono text-sm">{SDKS[activeTab].install}</code>
             <button onClick={copyInstall} className="p-2 dark:hover:bg-white/10 hover:bg-zinc-200 rounded dark:text-zinc-400 text-zinc-500 hover:dark:text-white hover:text-zinc-900 transition-colors">
               {copiedInstall ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -87,7 +87,7 @@ export default function SdkPlayground() {
               {copiedCode ? 'COPIED' : 'COPY CODE'}
             </button>
           </div>
-          <div className="flex-1 dark:bg-black bg-zinc-50 border dark:border-white/10 border-zinc-200 rounded-lg overflow-auto">
+          <div className="ui-subcard flex-1 !p-0 overflow-auto">
             <pre className="p-6 font-mono text-sm leading-relaxed text-blue-300">
               {SDKS[activeTab].code}
             </pre>

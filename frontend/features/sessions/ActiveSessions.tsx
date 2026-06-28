@@ -47,7 +47,7 @@ export default function ActiveSessions() {
   return (
     <div className="space-y-4">
       {sessions.map((session) => (
-        <div key={session.id} className="dark:bg-[#0c0c0c] bg-white shadow-sm border dark:border-white/10 border-zinc-200 rounded-xl p-5 flex items-center justify-between group dark:hover:border-white/20 hover:border-zinc-300 transition-colors">
+        <div key={session.id} className="ui-card p-5 flex items-center justify-between group dark:hover:border-white/20 hover:border-zinc-300 transition-colors">
           <div className="flex items-center gap-5">
             <div className="w-12 h-12 dark:bg-white/5 bg-zinc-100 rounded-full flex items-center justify-center border dark:border-white/10 border-zinc-200">
               {session.deviceType === 'desktop' ? <Laptop className="w-6 h-6 dark:text-zinc-400 text-zinc-500" /> : <Smartphone className="w-6 h-6 dark:text-zinc-400 text-zinc-500" />}

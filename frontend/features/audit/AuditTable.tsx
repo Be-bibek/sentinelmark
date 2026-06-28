@@ -125,7 +125,7 @@ export default function AuditTable() {
       {isError && <OfflineBanner onRetry={() => refetch()} />}
 
       {/* Table */}
-      <div className="flex-1 overflow-x-auto border border-white/10 rounded-lg bg-black/20">
+      <div className="flex-1 overflow-x-auto ui-card !p-0">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="bg-white/5 border-b border-white/10 text-xs uppercase tracking-wider text-zinc-400">
             <tr>

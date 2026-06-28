@@ -52,7 +52,7 @@ export default function BehaviorProfile() {
           <Card className="p-5">
             <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4">Device Baseline</h3>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-3 dark:bg-white/5 bg-zinc-50 rounded-lg border dark:border-white/5 border-zinc-200">
+              <div className="ui-subcard flex items-start gap-3">
                 <Laptop className="w-5 h-5 text-emerald-400 mt-0.5" />
                 <div>
                   <div className="text-sm dark:text-zinc-200 text-zinc-800">MacBook Pro (M2)</div>
@@ -60,7 +60,7 @@ export default function BehaviorProfile() {
                   <div className="text-[10px] bg-emerald-500/20 text-emerald-400 inline-block px-1.5 py-0.5 rounded mt-2 font-bold">PRIMARY DEVICE</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 dark:bg-white/5 bg-zinc-50 rounded-lg border dark:border-white/5 border-zinc-200 opacity-50 hover:opacity-100 transition-opacity">
+              <div className="ui-subcard flex items-start gap-3 opacity-50 hover:opacity-100 transition-opacity">
                 <Laptop className="w-5 h-5 text-zinc-400 mt-0.5" />
                 <div>
                   <div className="text-sm dark:text-zinc-200 text-zinc-800">iPhone 14 Pro</div>
