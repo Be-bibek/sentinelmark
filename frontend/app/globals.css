@@ -1,9 +1,8 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 @layer base {
   body {
-    background-color: #030303;
-    color: #f4f4f5;
     font-family: var(--font-sans), sans-serif;
   }
 }
