@@ -9,7 +9,7 @@ export function Card({ children, className, ...props }: CardProps) {
   return (
     <div 
       className={twMerge(
-        "dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-xl shadow-sm",
+        "dark:bg-black/40 bg-white/60 backdrop-blur-xl border dark:border-white/10 border-zinc-200/80 rounded-xl shadow-sm transition-all duration-300",
         className
       )}
       {...props}
