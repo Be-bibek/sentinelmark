@@ -52,11 +52,11 @@ export default function ApiExplorer() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[700px]">
       
       {/* Left Pane - Request */}
-      <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col">
+      <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <span className="bg-emerald-500/10 text-emerald-400 font-mono text-xs font-bold px-2 py-1 rounded">POST</span>
-            <span className="text-white font-mono text-sm">/v1/evaluate</span>
+            <span className="dark:text-white text-zinc-900 font-mono text-sm">/v1/evaluate</span>
           </div>
           <button 
             onClick={executeApi}
@@ -70,7 +70,7 @@ export default function ApiExplorer() {
         <div className="space-y-4 flex-1">
           <div>
             <h4 className="text-xs font-semibold text-zinc-500 uppercase mb-2">Headers</h4>
-            <div className="bg-black border border-white/5 rounded-lg p-3 font-mono text-xs space-y-1">
+            <div className="dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3 font-mono text-xs space-y-1">
               <div><span className="text-blue-400">Authorization:</span> <span className="text-green-400">Bearer sm_live_12345</span></div>
               <div><span className="text-blue-400">Content-Type:</span> <span className="text-green-400">application/json</span></div>
             </div>
@@ -81,23 +81,23 @@ export default function ApiExplorer() {
             <textarea 
               readOnly 
               value={payload}
-              className="w-full flex-1 bg-black border border-white/5 rounded-lg p-3 font-mono text-xs text-green-400 outline-none resize-none"
+              className="w-full flex-1 dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3 font-mono text-xs text-green-400 outline-none resize-none"
             />
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+        <div className="mt-4 pt-4 border-t dark:border-white/5 border-zinc-200 flex items-center justify-between">
           <span className="text-xs text-zinc-500 flex items-center gap-2"><Terminal className="w-4 h-4"/> Copy as cURL</span>
-          <button onClick={copyCommand} className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors">
+          <button onClick={copyCommand} className="p-2 dark:hover:bg-white/10 hover:bg-zinc-100 rounded-lg dark:text-zinc-400 text-zinc-500 hover:dark:text-white hover:text-zinc-900 transition-colors">
             {copied ? <Check className="w-4 h-4 text-emerald-400"/> : <Copy className="w-4 h-4"/>}
           </button>
         </div>
       </div>
 
       {/* Right Pane - Response */}
-      <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col">
-        <div className="flex items-center justify-between mb-6 pb-2 border-b border-white/5">
-          <h3 className="font-semibold text-white">Response</h3>
+      <div className="dark:bg-[#0c0c0c] bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-5 shadow-lg flex flex-col">
+        <div className="flex items-center justify-between mb-6 pb-2 border-b dark:border-white/5 border-zinc-200">
+          <h3 className="font-semibold dark:text-white text-zinc-900">Response</h3>
           {response && (
             <div className="flex gap-4">
               <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">200 OK</span>
@@ -106,7 +106,7 @@ export default function ApiExplorer() {
           )}
         </div>
 
-        <div className="flex-1 bg-black border border-white/5 rounded-lg overflow-hidden relative">
+        <div className="flex-1 dark:bg-black bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg overflow-hidden relative">
           {executing ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex gap-2">
