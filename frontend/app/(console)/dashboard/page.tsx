@@ -6,6 +6,7 @@ import TrustTimeline from "@/features/charts/TrustTimeline";
 import LiveEventCenter from "@/features/dashboard/LiveEventCenter";
 import TrustEnginePipeline from "@/features/dashboard/TrustEnginePipeline";
 import AttackCard from "@/features/simulator/AttackCard";
+import { Card } from "@/components/ui/Card";
 import { ATTACK_SCENARIOS } from "@/stores/simulator-store";
 import { useTrustStore } from "@/stores/trust-store";
 
@@ -28,16 +29,16 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Timeline Chart */}
-          <div className="lg:col-span-2 bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg min-h-[350px] flex flex-col">
-            <h3 className="text-sm font-semibold text-white mb-4">Trust Degradation Timeline</h3>
+          <Card className="lg:col-span-2 p-5 min-h-[350px] flex flex-col">
+            <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4">Trust Degradation Timeline</h3>
             <div className="flex-1 min-h-[250px]">
               <TrustTimeline data={sessionHistory.length > 0 ? (sessionHistory as any) : Array.from({length: 20}).map((_,i) => ({timestamp: new Date(), score: 98}))} />
             </div>
-          </div>
+          </Card>
 
           {/* Active Anomalies / Incident Queue */}
-          <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col">
-            <h3 className="text-sm font-semibold text-white mb-4 flex items-center justify-between">
+          <Card className="p-5 flex flex-col">
+            <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-4 flex items-center justify-between">
               Incident Queue
               <span className="bg-red-500/20 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">{anomalies.length} Active</span>
             </h3>
@@ -54,12 +55,12 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Threat Simulator section */}
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">Threat Simulation Vectors</h3>
+          <h3 className="text-lg font-bold dark:text-white text-zinc-900 mb-4">Threat Simulation Vectors</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {ATTACK_SCENARIOS.map(scenario => (
               <AttackCard key={scenario.id} scenario={scenario} />
