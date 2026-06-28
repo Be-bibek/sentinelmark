@@ -42,7 +42,7 @@ export default function LiveEventCenter() {
         <select 
           value={filterLevel}
           onChange={(e) => setFilter(e.target.value as any)}
-          className="dark:bg-white/5 bg-zinc-50 border dark:border-white/10 border-zinc-200 rounded px-2 py-1 text-xs dark:text-zinc-300 text-zinc-700 w-full outline-none"
+          className="ui-input"
         >
           <option value="all">All Events</option>
           <option value="warning">Warnings Only</option>
@@ -62,7 +62,7 @@ export default function LiveEventCenter() {
                 log.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-200' :
                 log.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' :
                 log.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' :
-                'dark:bg-white/5 bg-zinc-50 dark:border-white/10 border-zinc-200 dark:text-zinc-300 text-zinc-700'
+                'ui-subcard !p-0'
               }`}
             >
               <div className="flex justify-between items-start mb-1 opacity-70">

@@ -249,7 +249,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
 
       {/* Validation checklist */}
       {!idle && (
-        <div className="mb-5 space-y-1.5 p-3 bg-black/40 rounded-lg border dark:border-white/5 border-zinc-200">
+        <div className="mb-5 space-y-1.5 ui-subcard">
           {(Object.keys(CHECK_LABELS) as (keyof ValidationChecks)[]).map((key) => (
             <div key={key} className="flex items-center justify-between">
               <span className="text-[11px] text-zinc-400 flex items-center gap-1.5">
@@ -264,7 +264,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
 
       {/* Last result trace */}
       {hasResult && !isExecuting && (
-        <div className="mb-5 p-3 bg-black/40 rounded-lg border dark:border-white/5 border-zinc-200 space-y-1">
+        <div className="mb-5 ui-subcard space-y-1">
           {lastResult.requestId && (
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Request ID</span>
@@ -295,7 +295,7 @@ export default function AttackCard({ scenario }: { scenario: AttackScenario }) {
       <button
         onClick={executeAttack}
         disabled={isExecuting}
-        className="w-full py-2.5 bg-white/10 hover:bg-blue-600 dark:text-white text-zinc-900 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border dark:border-white/5 border-zinc-200 hover:border-transparent disabled:opacity-60 disabled:pointer-events-none group/btn"
+        className="w-full ui-button bg-transparent dark:bg-white/10 dark:hover:bg-blue-600 hover:bg-blue-600 hover:text-white dark:text-white text-zinc-900 border dark:border-white/5 border-zinc-200 hover:border-transparent font-bold uppercase tracking-wider group/btn"
       >
         {isExecuting ? (
           <span className="flex items-center gap-2 animate-pulse">

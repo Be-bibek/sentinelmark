@@ -28,7 +28,7 @@ export default function TrustEnginePipeline() {
   const { decision } = useTrustStore();
 
   return (
-    <div className="dark:bg-white/5 bg-white border dark:border-white/10 border-zinc-200 rounded-2xl p-6 relative overflow-hidden group">
+    <div className="ui-card p-6 relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
       
       <h3 className="text-sm font-semibold dark:text-white text-zinc-900 mb-6 flex items-center gap-2">
@@ -40,7 +40,7 @@ export default function TrustEnginePipeline() {
         {PIPELINE_STAGES.map((stage, i) => (
           <React.Fragment key={stage.id}>
             <div className="flex flex-col items-center gap-3 shrink-0">
-              <div className="w-12 h-12 rounded-xl dark:bg-black/40 bg-zinc-50 border dark:border-white/10 border-zinc-200 flex items-center justify-center shadow-lg relative dark:group-hover:dark:border-white/20 border-zinc-300 group-hover:border-zinc-300 transition-colors">
+              <div className="w-12 h-12 ui-subcard !p-0 !rounded-xl flex items-center justify-center shadow-lg relative dark:group-hover:dark:border-white/20 hover:border-zinc-300 transition-colors">
                 <stage.icon className={`w-5 h-5 ${stage.color}`} />
                 {/* Active pulse effect */}
                 <motion.div 
@@ -62,7 +62,7 @@ export default function TrustEnginePipeline() {
                   animate={{ left: "100%", opacity: [0, 1, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2, ease: "linear" }}
                 />
-                <ArrowRight className="w-3 h-3 text-zinc-600 relative z-10 dark:bg-[#0c0c0c] bg-white" />
+                <ArrowRight className="w-3 h-3 text-zinc-600 relative z-10 dark:bg-black/40 bg-white" />
               </div>
             )}
           </React.Fragment>

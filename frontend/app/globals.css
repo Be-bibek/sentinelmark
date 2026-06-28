@@ -57,3 +57,25 @@
   0% { transform: translate(0%, 0%); opacity: 1; }
   100% { transform: translate(100%, 0%); opacity: 0; }
 }
+
+@layer components {
+  /* Master Card Container */
+  .ui-card {
+    @apply dark:bg-black/40 bg-white/60 backdrop-blur-xl border dark:border-white/10 border-zinc-200/80 rounded-xl shadow-sm transition-all duration-300;
+  }
+  
+  /* Nested Panel / Item Container */
+  .ui-subcard {
+    @apply dark:bg-black/40 bg-zinc-50 border dark:border-white/5 border-zinc-200 rounded-lg p-3;
+  }
+  
+  /* Standard Input / Search Field */
+  .ui-input {
+    @apply w-full border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500/50 transition-colors dark:bg-white/5 dark:border-white/10 dark:text-zinc-300 dark:placeholder-zinc-600 bg-white border-zinc-200 text-zinc-800 placeholder-zinc-400;
+  }
+  
+  /* Standard Action Button */
+  .ui-button {
+    @apply flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm transition-all dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 border bg-white border-zinc-200 hover:bg-zinc-100 text-zinc-900 dark:text-white disabled:opacity-40 disabled:pointer-events-none;
+  }
+}

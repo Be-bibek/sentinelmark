@@ -91,7 +91,7 @@ export default function AuditTable() {
               placeholder="Search user, ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors w-56"
+              className="ui-input pl-9 w-56"
             />
           </div>
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">
@@ -110,13 +110,13 @@ export default function AuditTable() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button onClick={() => refetch()} className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-zinc-300">
+          <button onClick={() => refetch()} className="ui-button">
             <RefreshCw className="w-4 h-4" />
           </button>
-          <button onClick={exportCSV}  className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white">
+          <button onClick={exportCSV}  className="ui-button">
             <Download className="w-4 h-4" /> CSV
           </button>
-          <button onClick={exportJSON} className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white">
+          <button onClick={exportJSON} className="ui-button">
             <Download className="w-4 h-4" /> JSON
           </button>
         </div>
@@ -207,12 +207,12 @@ export default function AuditTable() {
         </div>
         <div className="flex gap-1">
           <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-            className="px-3 py-1 bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none">
+            className="ui-button px-3 py-1">
             Prev
           </button>
           <div className="px-3 py-1 text-white">{page} / {Math.max(1, totalPages)}</div>
           <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
-            className="px-3 py-1 bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none">
+            className="ui-button px-3 py-1">
             Next
           </button>
         </div>

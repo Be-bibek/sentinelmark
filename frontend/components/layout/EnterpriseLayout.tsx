@@ -111,7 +111,7 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
               <input 
                 type="text" 
                 placeholder="Search events, IP, user..." 
-                className={`w-full border rounded-lg pl-10 pr-4 py-1.5 text-sm focus:outline-none focus:border-blue-500/50 transition-colors ${isDark ? "bg-white/5 border-white/10 text-zinc-300 placeholder-zinc-600" : "bg-white border-zinc-200 text-zinc-800 placeholder-zinc-400"}`}
+                className="ui-input pl-10"
               />
             </div>
           </div>
