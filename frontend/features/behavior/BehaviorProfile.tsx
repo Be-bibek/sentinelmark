@@ -1,26 +1,40 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import BehaviorHeatmap from "@/features/charts/BehaviorHeatmap";
-import { Laptop, Globe, Clock, MousePointer2, Keyboard, ShieldAlert } from "lucide-react";
+import { Laptop, Globe, Clock, MousePointer2, Keyboard, ShieldAlert, Smartphone } from "lucide-react";
+import { SentinelAPI } from "@/lib/api";
+import { DataSourceBadge, type DataSource } from "@/components/ui/DataSourceBadge";
+
+const USER_ID = "dev.ops@enterprise.com";
 
 export default function BehaviorProfile() {
-  // Generate fake behavior data for the Heatmap
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
+
+  // Real behavior profile from backend
+  const { data: profile, isError: profileError, isLoading: profileLoading } = useQuery({
+    queryKey: ["behavior-profile", USER_ID],
+    queryFn:  () => SentinelAPI.getBehaviorProfile(USER_ID),
+    retry: 1,
+    staleTime: 30000,
+  });
+
+  const profileSource: DataSource = profileError ? "OFFLINE" : profileLoading ? "CACHED" : profile ? "LIVE" : "MOCK";
+
+  // Known devices from backend (fallback to defaults if not available)
+  const knownDevices = profile?.known_devices ?? ["dev_macbook_primary", "dev_iphone_14"];
+  const knownRegions = profile?.known_regions ?? ["US (San Francisco)"];
 
   useEffect(() => {
     const data = [];
     for (let day = 0; day < 7; day++) {
       for (let hour = 0; hour < 24; hour++) {
-        // More activity during work hours (9-17) on weekdays (1-5)
         const isWorkHour = hour >= 9 && hour <= 17;
         const isWeekday = day >= 1 && day <= 5;
         let baseCount = 5;
-        
         if (isWorkHour && isWeekday) baseCount += 80;
         if (isWeekday && (hour === 8 || hour === 18)) baseCount += 40;
-        
-        // Add some random noise
         const count = Math.max(0, baseCount + (Math.random() * 40 - 20));
         data.push({ day, hour, count: Math.round(count) });
       }

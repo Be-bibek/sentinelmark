@@ -15,7 +15,8 @@ import {
   Fingerprint,
   FileText,
   Terminal,
-  Wifi
+  Wifi,
+  HeartPulse
 } from "lucide-react";
 import { useWebSocketStore, initializeWebSocket } from "@/stores/websocket-store";
 
@@ -28,13 +29,14 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
   }, []);
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Active Sessions", href: "/sessions", icon: Clock },
-    { name: "Behavior Profiler", href: "/behavior", icon: Fingerprint },
-    { name: "Explainability", href: "/explainability", icon: Search },
-    { name: "Audit Ledger", href: "/audit", icon: FileText },
-    { name: "API Explorer", href: "/api", icon: Terminal },
-    { name: "SDKs & Integrations", href: "/sdk", icon: Settings },
+    { name: "Dashboard",         href: "/dashboard",     icon: LayoutDashboard },
+    { name: "Active Sessions",   href: "/sessions",      icon: Clock },
+    { name: "Behavior Profiler", href: "/behavior",      icon: Fingerprint },
+    { name: "Explainability",    href: "/explainability", icon: Search },
+    { name: "Audit Ledger",      href: "/audit",         icon: FileText },
+    { name: "API Explorer",      href: "/api",           icon: Terminal },
+    { name: "SDKs & Integrations", href: "/sdk",         icon: Settings },
+    { name: "System Health",     href: "/health",        icon: HeartPulse },
   ];
 
   return (

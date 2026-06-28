@@ -18,7 +18,7 @@ import {
 import { motion } from "motion/react";
 import { UserCheck, ShieldCheck, Activity } from "lucide-react";
 import StarBorder from "./StarBorder";
-import { BehaviorProfile as BehaviorProfileType } from "@/lib/api";
+import { BehaviorProfileResponse as BehaviorProfileType } from "@/lib/api";
 
 const riskFactors = [
   { subject: "Location Anomaly", A: 20, B: 10, fullMark: 100 },
@@ -48,11 +48,11 @@ export default function BehaviorProfile({ score, theme = "dark", profile }: Beha
 
   // Derive risk factors from the profile if available
   const riskFactors = profile ? [
-    { subject: "Location Anomaly", A: profile.known_regions.length > 0 ? 10 : 80, B: 20, fullMark: 100 },
-    { subject: "Device Profile", A: profile.known_devices.length > 0 ? 15 : 75, B: 20, fullMark: 100 },
-    { subject: "Speed Vector", A: profile.risk_score, B: 15, fullMark: 100 },
-    { subject: "Access Frequency", A: 100 - profile.trust_score, B: 25, fullMark: 100 },
-    { subject: "Avg Session", A: profile.avg_session_duration > 3600 ? 50 : 20, B: 30, fullMark: 100 },
+    { subject: "Location Anomaly",  A: profile.known_regions.length > 0 ? 10 : 80,  B: 20, fullMark: 100 },
+    { subject: "Device Profile",    A: profile.known_devices.length > 0 ? 15 : 75,  B: 20, fullMark: 100 },
+    { subject: "Speed Vector",      A: 25,                                             B: 15, fullMark: 100 },
+    { subject: "Access Frequency",  A: 30,                                             B: 25, fullMark: 100 },
+    { subject: "Avg Transaction",   A: Math.min(profile.avg_transaction_amount / 100, 100), B: 30, fullMark: 100 },
   ] : [
     { subject: "Location Anomaly", A: 20, B: 10, fullMark: 100 },
     { subject: "Device Profile", A: 15, B: 20, fullMark: 100 },
@@ -121,18 +121,18 @@ export default function BehaviorProfile({ score, theme = "dark", profile }: Beha
         <div className={`p-3 rounded-xl border ${
           isDark ? "bg-white/[0.02] border-white/5" : "bg-zinc-50 border-zinc-200"
         }`}>
-          <span className={`text-[9px] uppercase font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>Avg Session</span>
+          <span className={`text-[9px] uppercase font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>Avg Transaction</span>
           <div className="text-xs font-mono mt-1 font-bold">
-            {profile ? `${Math.round(profile.avg_session_duration / 60)} mins` : "2h 14m"}
+            {profile ? `$${profile.avg_transaction_amount.toFixed(2)}` : "$0.00"}
           </div>
         </div>
         
         <div className={`p-3 rounded-xl border ${
           isDark ? "bg-white/[0.02] border-white/5" : "bg-zinc-50 border-zinc-200"
         }`}>
-          <span className={`text-[9px] uppercase font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>MFA Enrolled</span>
-          <div className="text-xs font-mono mt-1 font-bold text-emerald-500">
-            {profile?.mfa_enrolled !== false ? "YES (YubiKey 5C)" : "NO"}
+          <span className={`text-[9px] uppercase font-bold tracking-wider ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>Known Regions</span>
+          <div className="text-xs font-mono mt-1 font-bold">
+            {profile ? (profile.known_regions[0] ?? "Unknown") : "US"}
           </div>
         </div>
       </div>

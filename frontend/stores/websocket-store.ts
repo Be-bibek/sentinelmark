@@ -6,10 +6,16 @@ export type WebSocketStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTED' | 'ERR
 export interface WebSocketStore {
   status: WebSocketStatus;
   lastPing: Date | null;
+  lastEventAt: Date | null;
+  connectedAt: Date | null;
   reconnectAttempts: number;
-  
+  messagesReceived: number;
+  messagesSent: number;
+
   setStatus: (status: WebSocketStatus) => void;
   recordPing: () => void;
+  recordMessageReceived: () => void;
+  recordMessageSent: () => void;
   incrementReconnect: () => void;
   resetReconnect: () => void;
 }
@@ -17,103 +23,154 @@ export interface WebSocketStore {
 export const useWebSocketStore = create<WebSocketStore>((set) => ({
   status: 'DISCONNECTED',
   lastPing: null,
+  lastEventAt: null,
+  connectedAt: null,
   reconnectAttempts: 0,
-  
-  setStatus: (status) => set({ status }),
-  recordPing: () => set({ lastPing: new Date() }),
+  messagesReceived: 0,
+  messagesSent: 0,
+
+  setStatus: (status) => set((state) => ({
+    status,
+    connectedAt: status === 'CONNECTED' && state.status !== 'CONNECTED'
+      ? new Date()
+      : state.connectedAt,
+  })),
+  recordPing: () => set({ lastPing: new Date(), lastEventAt: new Date() }),
+  recordMessageReceived: () => set((state) => ({
+    messagesReceived: state.messagesReceived + 1,
+    lastEventAt: new Date(),
+  })),
+  recordMessageSent: () => set((state) => ({ messagesSent: state.messagesSent + 1 })),
   incrementReconnect: () => set((state) => ({ reconnectAttempts: state.reconnectAttempts + 1 })),
-  resetReconnect: () => set({ reconnectAttempts: 0 })
+  resetReconnect: () => set({ reconnectAttempts: 0 }),
 }));
 
-// Initialize WS connection manager (singleton pattern for the frontend)
+// ─── Singleton WebSocket manager ─────────────────────────────────────────────
+
 let wsInstance: WebSocket | null = null;
 let heartbeatInterval: NodeJS.Timeout | null = null;
 
-export const initializeWebSocket = (url: string = 'ws://localhost:8000/ws') => {
-  if (typeof window === 'undefined') return; // Next.js SSR guard
-  
+export const initializeWebSocket = (url: string = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/api/v1/ws') => {
+  if (typeof window === 'undefined') return; // SSR guard
+
   if (wsInstance && (wsInstance.readyState === WebSocket.OPEN || wsInstance.readyState === WebSocket.CONNECTING)) {
     return;
   }
 
-  const { setStatus, recordPing, incrementReconnect, resetReconnect } = useWebSocketStore.getState();
+  const store = useWebSocketStore.getState();
   const { addLog } = useTelemetryStore.getState();
 
-  setStatus('CONNECTING');
+  store.setStatus('CONNECTING');
 
   try {
     wsInstance = new WebSocket(url);
 
     wsInstance.onopen = () => {
-      setStatus('CONNECTED');
-      resetReconnect();
-      addLog({
-        event: 'WebSocket connection established with TrustOS backend.',
-        type: 'success',
-        source: 'System'
-      });
-      
-      // Setup heartbeat ping simulation (or actual if backend supports it)
+      useWebSocketStore.getState().setStatus('CONNECTED');
+      useWebSocketStore.getState().resetReconnect();
+      addLog({ event: 'WebSocket connected to TrustOS backend.', type: 'success', source: 'System' });
+
+      // Heartbeat: send ping every 30s (matches backend ping/pong)
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(() => {
         if (wsInstance?.readyState === WebSocket.OPEN) {
-          // Sent simple ping
           wsInstance.send(JSON.stringify({ type: 'PING', timestamp: new Date().toISOString() }));
-          recordPing();
+          useWebSocketStore.getState().recordMessageSent();
+          useWebSocketStore.getState().recordPing();
         }
-      }, 5000);
+      }, 30000);
     };
 
     wsInstance.onmessage = (event) => {
+      useWebSocketStore.getState().recordMessageReceived();
+
       try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'PONG') {
-          recordPing();
+        const data = JSON.parse(event.data as string);
+
+        if (data.event === 'connected') {
+          // Welcome frame from backend
           return;
         }
-        
-        // Handle incoming live telemetry events
-        if (data.event) {
-            addLog({
-                event: data.event,
-                type: data.type || 'info',
-                source: data.source || 'Stream'
-            });
+
+        // Map backend WsEvent types to telemetry log entries
+        const eventType = data.event as string;
+        let logMessage = '';
+        let logType: 'info' | 'warning' | 'error' | 'success' = 'info';
+
+        switch (eventType) {
+          case 'trust_evaluated':
+            logMessage = `Trust evaluated for ${data.user_id} → ${data.decision} (score: ${data.trust_score?.toFixed(1)}, ${data.evaluation_time_ms}ms)`;
+            logType = data.decision === 'BLOCK' ? 'error' : data.decision === 'ALLOW' ? 'success' : 'warning';
+            break;
+          case 'risk_changed':
+            logMessage = `Risk changed for ${data.user_id}: ${data.previous_score?.toFixed(2)} → ${data.new_score?.toFixed(2)}`;
+            logType = 'warning';
+            break;
+          case 'policy_changed':
+            logMessage = `Policy decision: ${data.decision} for ${data.user_id}`;
+            logType = data.decision === 'BLOCK' ? 'error' : 'info';
+            break;
+          case 'audit_created':
+            logMessage = `Audit record created: ${data.audit_id} for ${data.user_id}`;
+            logType = 'success';
+            break;
+          case 'session_blocked':
+            logMessage = `Session BLOCKED for ${data.user_id}: ${data.reason}`;
+            logType = 'error';
+            break;
+          case 'multi_sig_required':
+            logMessage = `Multi-sig required for ${data.user_id} (risk: ${data.risk_score?.toFixed(2)})`;
+            logType = 'warning';
+            break;
+          case 'telemetry_received':
+            logMessage = `Telemetry from ${data.user_id}: ${data.action_type} on ${data.device_id}`;
+            logType = 'info';
+            break;
+          case 'profile_updated':
+            logMessage = `Behavior profile updated for ${data.user_id}`;
+            logType = 'info';
+            break;
+          default:
+            logMessage = `WS event: ${eventType}`;
         }
-      } catch (e) {
+
+        if (logMessage) {
+          addLog({ event: logMessage, type: logType, source: 'WebSocket' });
+        }
+      } catch {
         // Ignore unparseable frames
       }
     };
 
     wsInstance.onclose = () => {
-      setStatus('DISCONNECTED');
+      useWebSocketStore.getState().setStatus('DISCONNECTED');
       if (heartbeatInterval) clearInterval(heartbeatInterval);
-      
-      addLog({
-        event: 'WebSocket connection lost. Attempting to reconnect...',
-        type: 'warning',
-        source: 'System'
-      });
+
+      addLog({ event: 'WebSocket disconnected. Reconnecting...', type: 'warning', source: 'System' });
 
       const attempts = useWebSocketStore.getState().reconnectAttempts;
       if (attempts < 5) {
-        incrementReconnect();
-        setTimeout(() => initializeWebSocket(url), Math.min(1000 * Math.pow(2, attempts), 10000));
+        useWebSocketStore.getState().incrementReconnect();
+        const delay = Math.min(1000 * Math.pow(2, attempts), 30000);
+        setTimeout(() => initializeWebSocket(url), delay);
       } else {
-        setStatus('ERROR');
-        addLog({
-          event: 'Maximum reconnect attempts reached. Stream halted.',
-          type: 'error',
-          source: 'System'
-        });
+        useWebSocketStore.getState().setStatus('ERROR');
+        addLog({ event: 'Max reconnect attempts reached. Stream halted.', type: 'error', source: 'System' });
       }
     };
 
     wsInstance.onerror = () => {
-      setStatus('ERROR');
+      useWebSocketStore.getState().setStatus('ERROR');
     };
-    
-  } catch (e) {
-    setStatus('ERROR');
+  } catch {
+    useWebSocketStore.getState().setStatus('ERROR');
+  }
+};
+
+export const disconnectWebSocket = () => {
+  if (wsInstance) {
+    if (heartbeatInterval) clearInterval(heartbeatInterval);
+    wsInstance.close();
+    wsInstance = null;
   }
 };

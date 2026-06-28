@@ -5,7 +5,13 @@ import { motion, useMotionValue, useSpring, useTransform, animate } from "motion
 import { Shield, ShieldAlert, Zap, Activity } from "lucide-react";
 import StarBorder from "./StarBorder";
 
-import { SystemMetrics } from "@/lib/api";
+// Local type (SystemMetrics was removed from api.ts; define minimally here)
+interface SystemMetrics {
+  total_evaluations?: number;
+  active_sessions?: number;
+  avg_latency_ms?: number;
+  error_rate?: number;
+}
 
 interface KPICardsProps {
   score: number;
