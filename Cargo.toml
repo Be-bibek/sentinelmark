@@ -16,9 +16,6 @@ trust-engine         = { path = "crates/trust-engine" }
 policy-engine        = { path = "crates/policy-engine" }
 audit-engine         = { path = "crates/audit-engine" }
 storage-engine       = { path = "crates/storage-engine" }
-workflow-engine      = { path = "crates/workflow-engine" }
-identity-engine      = { path = "crates/identity-engine" }
-explainability-engine = { path = "crates/explainability-engine" }
 sentinelmark-rs      = { path = "sdk/sentinelmark-rs" }
 
 # Async runtime

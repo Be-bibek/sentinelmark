@@ -6,6 +6,7 @@ mod ws;
 mod middleware;
 mod routes;
 mod adapters;
+mod docs;
 
 use std::sync::Arc;
 use std::net::SocketAddr;
@@ -34,6 +35,8 @@ use crate::middleware::request_id::MakeUuidRequestId;
 use crate::ws::{ws_handler, WsEvent};
 use storage_engine::PostgresStorage;
 use sentinelmark_rs::SentinelMark;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[tokio::main]
 async fn main() {
@@ -151,6 +154,17 @@ async fn main() {
         .route("/behavior-profile/:user_id", get(routes::behavior_profile::get_behavior_profile))
         .route("/audit/:user_id",            get(routes::audit::get_audit))
         .route("/events",                    post(routes::events::handle_platform_event))
+        
+        // Developer Portal APIs
+        .route("/api-keys",                  get(routes::api_keys::list_keys).post(routes::api_keys::create_key))
+        .route("/api-keys/:id",              axum::routing::delete(routes::api_keys::revoke_key))
+        .route("/events-explorer",           get(routes::events_explorer::list_events))
+        .route("/products",                  get(routes::products::list_products))
+        .route("/products/:product_slug/toggle", post(routes::products::toggle_product))
+        .route("/projects/current",          get(routes::projects::get_project))
+        .route("/team",                      get(routes::team::list_team))
+        .route("/organizations/current",     get(routes::tenants::get_tenant))
+        .route("/usage",                     get(routes::usage::get_usage_metrics))
         // WebSocket
         .route("/ws", get(ws_handler))
         .layer(axum::middleware::from_fn_with_state(
@@ -161,8 +175,11 @@ async fn main() {
 
     let api_v1 = api_v1_public.merge(api_v1_protected);
 
+    let api_doc = crate::docs::ApiDoc::openapi();
+
     let app = Router::new()
         .nest("/api/v1", api_v1)
+        .merge(SwaggerUi::new("/swagger-ui").url("/api/v1/openapi.json", api_doc))
         // Fallback for bare /health for Railway healthchecks
         .route("/health", get(|| async { "ok" }))
         .layer(SetRequestIdLayer::new(x_request_id.clone(), MakeUuidRequestId))

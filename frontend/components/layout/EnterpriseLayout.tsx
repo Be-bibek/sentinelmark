@@ -16,12 +16,20 @@ import {
   Clock,
   Settings,
   Fingerprint,
-  FileText,
   Terminal,
+  FileText,
   Wifi,
   HeartPulse,
   Sun,
-  Moon
+  Moon,
+  Key,
+  Users,
+  CreditCard,
+  Code2,
+  ListVideo,
+  Bug,
+  BookOpen,
+  FlaskConical,
 } from "lucide-react";
 import { useWebSocketStore, initializeWebSocket } from "@/stores/websocket-store";
 
@@ -37,14 +45,32 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
   }, []);
 
   const navigation = [
-    { name: "Dashboard",         href: "/dashboard",     icon: LayoutDashboard },
-    { name: "Active Sessions",   href: "/sessions",      icon: Clock },
-    { name: "Behavior Profiler", href: "/behavior",      icon: Fingerprint },
-    { name: "Explainability",    href: "/explainability", icon: Search },
-    { name: "Audit Ledger",      href: "/audit",         icon: FileText },
-    { name: "API Explorer",      href: "/api",           icon: Terminal },
-    { name: "SDKs & Integrations", href: "/sdk",         icon: Settings },
-    { name: "System Health",     href: "/health",        icon: HeartPulse },
+    // Platform Management
+    { name: "Dashboard",       href: "/dashboard",       icon: LayoutDashboard, group: "Platform Management" },
+    { name: "Organizations",   href: "/organizations",   icon: Settings,        group: "Platform Management" },
+    { name: "Projects",        href: "/projects",        icon: Settings,        group: "Platform Management" },
+    { name: "Products",        href: "/products",        icon: Settings,        group: "Platform Management" },
+    { name: "API Keys",        href: "/api-keys",        icon: Key,             group: "Platform Management" },
+    { name: "Team",            href: "/team",            icon: Users,           group: "Platform Management" },
+    { name: "Usage & Billing", href: "/usage",           icon: CreditCard,      group: "Platform Management" },
+    { name: "SDKs",            href: "/sdk",             icon: Code2,           group: "Platform Management" },
+    { name: "Settings",        href: "/settings",        icon: Settings,        group: "Platform Management" },
+
+    // Trust Analytics
+    { name: "Live Events",     href: "/events-explorer", icon: Activity,        group: "Trust Analytics" },
+    { name: "Behavior Profiles",href: "/behavior",       icon: Fingerprint,     group: "Trust Analytics" },
+    { name: "Sessions",        href: "/sessions",        icon: Clock,           group: "Trust Analytics" },
+    { name: "Threat Simulator",href: "/threats",         icon: Shield,          group: "Trust Analytics" },
+    { name: "Explainability",  href: "/explainability",  icon: Search,          group: "Trust Analytics" },
+    { name: "Audit Ledger",    href: "/audit",           icon: FileText,        group: "Trust Analytics" },
+    { name: "System Health",   href: "/health",          icon: HeartPulse,      group: "Trust Analytics" },
+    { name: "Incident Replay", href: "/replay",          icon: ListVideo,       group: "Trust Analytics" },
+
+    // Developer
+    { name: "API Explorer",    href: "/api",             icon: Terminal,        group: "Developer" },
+    { name: "API Playground",  href: "/api-playground",  icon: FlaskConical,    group: "Developer" },
+    { name: "Logs",            href: "/logs",            icon: Bug,             group: "Developer" },
+    { name: "Documentation",   href: "/docs",            icon: BookOpen,        group: "Developer" },
   ];
 
   return (
@@ -72,33 +98,35 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link 
-                key={item.name} 
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                  isActive 
-                    ? (isDark ? "bg-blue-600/10 text-blue-400 font-medium" : "bg-blue-50 text-blue-600 font-medium") 
-                    : (isDark ? "text-zinc-400 hover:text-zinc-100 hover:bg-white/5" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100")
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? (isDark ? "text-blue-400" : "text-blue-600") : "text-zinc-500"}`} />
-                {item.name}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
+          {["Platform Management", "Trust Analytics", "Developer"].map(group => (
+            <div key={group}>
+              <h3 className={`px-3 text-xs font-semibold tracking-wider uppercase mb-2 ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
+                {group}
+              </h3>
+              <div className="space-y-0.5">
+                {navigation.filter(item => item.group === group).map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link 
+                      key={item.name} 
+                      href={item.href}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                        isActive 
+                          ? (isDark ? "bg-blue-600/10 text-blue-400 font-medium" : "bg-blue-50 text-blue-600 font-medium") 
+                          : (isDark ? "text-zinc-400 hover:text-zinc-100 hover:bg-white/5" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100")
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${isActive ? (isDark ? "text-blue-400" : "text-blue-600") : "text-zinc-500"}`} />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
-
-        <div className={`p-4 border-t ${isDark ? "border-white/5" : "border-zinc-200"}`}>
-          <Link href="/settings" className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${isDark ? "text-zinc-400 hover:text-zinc-100 hover:bg-white/5" : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"}`}>
-            <Settings className="w-4 h-4 text-zinc-500" />
-            Settings
-          </Link>
-        </div>
       </aside>
 
       {/* Main Content Area */}
