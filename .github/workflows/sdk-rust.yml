@@ -1,0 +1,45 @@
+name: SDK Rust CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'sdk-rust/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'sdk-rust/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Rust SDK Quality Gate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sdk-rust
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: sdk-rust
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run cargo check
+        run: cargo check --all

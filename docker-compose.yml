@@ -1,30 +1,165 @@
 version: '3.8'
 
+# ─── SentinelMark Full Local Stack ────────────────────────────────────────────
+# Usage: docker-compose up
+# Dashboard:   http://localhost:3000
+# API:         http://localhost:8080
+# Swagger:     http://localhost:8080/swagger-ui
+# Prometheus:  http://localhost:9090
+# Grafana:     http://localhost:3001  (admin / sentinelmark)
+# Jaeger:      http://localhost:16686
+# Adminer:     http://localhost:8081
+
+networks:
+  sentinelmark:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
 services:
+
+  # ─── Database ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: sm-postgres
+    restart: unless-stopped
+    networks: [sentinelmark]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sentinelmark}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sentinelmark}
+      POSTGRES_DB: ${POSTGRES_DB:-sentinelmark}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinelmark"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: sm-redis
+    restart: unless-stopped
+    networks: [sentinelmark]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── API Gateway ───────────────────────────────────────────────────────────
   api-gateway:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: sm-api
+    restart: unless-stopped
+    networks: [sentinelmark]
     ports:
       - "8080:8080"
     environment:
-      - PORT=8080
-      - ENVIRONMENT=development
-      - RUST_LOG=info
-      - DATABASE_URL=${DATABASE_URL}
-      - AUTH_MODE=disabled
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
-    restart: unless-stopped
+      PORT: "8080"
+      ENVIRONMENT: development
+      RUST_LOG: info
+      DATABASE_URL: postgres://${POSTGRES_USER:-sentinelmark}:${POSTGRES_PASSWORD:-sentinelmark}@postgres:5432/${POSTGRES_DB:-sentinelmark}
+      REDIS_URL: redis://redis:6379
+      AUTH_MODE: jwt
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
+  # ─── Frontend ──────────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: sm-frontend
+    restart: unless-stopped
+    networks: [sentinelmark]
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
-      - NEXT_PUBLIC_WS_URL=ws://localhost:8080/api/v1/ws
-    restart: unless-stopped
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+      NEXT_PUBLIC_WS_URL: ws://localhost:8080/api/v1/ws
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
+
+  # ─── Prometheus ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: sm-prometheus
+    restart: unless-stopped
+    networks: [sentinelmark]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+
+  # ─── Grafana ───────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: sm-grafana
+    restart: unless-stopped
+    networks: [sentinelmark]
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: sentinelmark
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    depends_on:
+      - prometheus
+
+  # ─── Jaeger (Distributed Tracing) ─────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: sm-jaeger
+    restart: unless-stopped
+    networks: [sentinelmark]
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  # ─── Adminer (DB Admin UI) ─────────────────────────────────────────────────
+  adminer:
+    image: adminer:4.8.1
+    container_name: sm-adminer
+    restart: unless-stopped
+    networks: [sentinelmark]
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres

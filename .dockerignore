@@ -1,0 +1,9 @@
+target/
+.git/
+sdk-*/
+docs/
+examples/
+postman/
+frontend/
+migrations/
+*.md

@@ -1,0 +1,46 @@
+name: SDK Python CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'sdk-python/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'sdk-python/**'
+
+jobs:
+  test:
+    name: Python SDK Quality Gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    defaults:
+      run:
+        working-directory: sdk-python
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" || pip install requests pytest
+
+      - name: Syntax check
+        run: python -m py_compile sentinelmark/client.py sentinelmark/errors.py
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest tests/ -v
+          else
+            echo "No test suite yet — syntax validation passed."
+          fi
