@@ -5,6 +5,7 @@ mod state;
 mod ws;
 mod middleware;
 mod routes;
+mod adapters;
 
 use std::sync::Arc;
 use std::net::SocketAddr;
@@ -101,6 +102,7 @@ async fn main() {
     let storage = Arc::new(PostgresStorage::new(pool.clone()));
     let sdk = Arc::new(SentinelMark::new());
     let config = Arc::new(config);
+    let registry = Arc::new(crate::adapters::AdapterRegistry::new());
 
     let state = AppState {
         config: config.clone(),
@@ -108,6 +110,7 @@ async fn main() {
         storage,
         sdk,
         ws_tx,
+        registry,
     };
 
     // ──────────────────────────────────────────────────────────────────────
@@ -147,6 +150,7 @@ async fn main() {
         .route("/telemetry",                 post(routes::telemetry::ingest_telemetry))
         .route("/behavior-profile/:user_id", get(routes::behavior_profile::get_behavior_profile))
         .route("/audit/:user_id",            get(routes::audit::get_audit))
+        .route("/events",                    post(routes::events::handle_platform_event))
         // WebSocket
         .route("/ws", get(ws_handler))
         .layer(axum::middleware::from_fn_with_state(
