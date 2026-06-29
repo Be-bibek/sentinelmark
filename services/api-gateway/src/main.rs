@@ -133,20 +133,29 @@ async fn main() {
     // ──────────────────────────────────────────────────────────────────────
     let x_request_id = HeaderName::from_static("x-request-id");
 
-    let api_v1 = Router::new()
-        // Health & infra
+    let api_v1_public = Router::new()
+        // Health & infra — no auth required (Railway uses these for uptime checks)
         .route("/health/live",  get(routes::health::health_live))
         .route("/health/ready", get(routes::health::health_ready))
         .route("/version",      get(routes::version::version))
         .route("/metrics",      get(routes::metrics::metrics))
-        // Core API
+        .with_state(state.clone());
+
+    let api_v1_protected = Router::new()
+        // Core API — all require a valid API key
         .route("/evaluate",                  post(routes::evaluate::evaluate))
         .route("/telemetry",                 post(routes::telemetry::ingest_telemetry))
         .route("/behavior-profile/:user_id", get(routes::behavior_profile::get_behavior_profile))
         .route("/audit/:user_id",            get(routes::audit::get_audit))
         // WebSocket
         .route("/ws", get(ws_handler))
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            crate::middleware::auth::auth_middleware,
+        ))
         .with_state(state);
+
+    let api_v1 = api_v1_public.merge(api_v1_protected);
 
     let app = Router::new()
         .nest("/api/v1", api_v1)
