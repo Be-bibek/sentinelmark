@@ -1,0 +1,25 @@
+{
+  "name": "sentinelmark",
+  "version": "1.0.0",
+  "description": "Official Node.js SDK for the SentinelMark Trust Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "trust",
+    "security",
+    "sentinelmark",
+    "platform"
+  ],
+  "author": "SentinelMark <engineering@sentinelmark.ai>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

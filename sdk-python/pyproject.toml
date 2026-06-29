@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinelmark"
+version = "1.0.0"
+description = "Official Python SDK for the SentinelMark Trust Platform"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "SentinelMark", email = "engineering@sentinelmark.ai" }
+]
+dependencies = [
+    "requests>=2.25.1",
+]
+
+[project.urls]
+Homepage = "https://sentinelmark.dev"
+Source = "https://github.com/Be-bibek/sentinelmark"
