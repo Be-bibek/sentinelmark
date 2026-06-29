@@ -4,7 +4,7 @@ members = [
     "sdk/*",
     "services/*",
     "examples/*"
-]
+, "sdk-rust"]
 resolver = "2"
 
 [workspace.dependencies]
