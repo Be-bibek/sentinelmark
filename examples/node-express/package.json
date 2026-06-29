@@ -1,0 +1,9 @@
+{
+  "name": "sentinelmark-express-example",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sentinelmark": "^1.0.0"
+  }
+}
