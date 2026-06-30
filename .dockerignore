@@ -1,6 +1,8 @@
 target/
 .git/
-sdk-*/
+sdk-python/
+sdk-node/
+sdk-go/
 docs/
 examples/
 postman/
