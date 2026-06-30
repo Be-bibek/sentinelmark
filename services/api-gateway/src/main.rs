@@ -7,6 +7,8 @@ mod middleware;
 mod routes;
 mod adapters;
 mod docs;
+mod telemetry;
+
 
 use std::sync::Arc;
 use std::net::SocketAddr;
@@ -73,6 +75,14 @@ async fn main() {
         auth_mode = ?config.auth_mode,
         "SentinelMark v2 API Gateway starting"
     );
+
+    // ──────────────────────────────────────────────────────────────────────
+    // 2b. Initialize Prometheus metrics (force lazy_static init)
+    // ──────────────────────────────────────────────────────────────────────
+    lazy_static::initialize(&telemetry::HTTP_REQUESTS_TOTAL);
+    lazy_static::initialize(&telemetry::TRUST_EVALUATIONS_TOTAL);
+    lazy_static::initialize(&telemetry::WS_CONNECTED_CLIENTS);
+    info!("Prometheus metrics registry initialized");
 
     // ──────────────────────────────────────────────────────────────────────
     // 3. Connect to PostgreSQL with retry

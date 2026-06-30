@@ -1,4 +1,4 @@
-﻿//! POST /api/v1/evaluate — Full trust evaluation pipeline.
+//! POST /api/v1/evaluate — Full trust evaluation pipeline.
 //!
 //! Executes: Telemetry → Behavior → Risk → Trust → Policy → Audit → WS Broadcast
 
@@ -9,8 +9,9 @@ use std::time::Instant;
 use tracing::{info, instrument};
 use validator::Validate;
 
-use crate::{error::AppError, response::ApiResponse, state::AppState};
+use crate::{error::AppError, response::ApiResponse, state::AppState, telemetry};
 use crate::ws::WsEvent;
+
 use sentinelmark_core::UserId;
 use telemetry_engine::{TelemetryEvent, ActionType};
 use audit_engine::AuditEntry;
@@ -144,6 +145,15 @@ pub async fn evaluate(
             timestamp: Utc::now(),
         });
     }
+
+    // ── Prometheus metrics ──────────────────────────────────────────────────
+    let eval_secs = start.elapsed().as_secs_f64();
+    telemetry::TRUST_EVALUATIONS_TOTAL
+        .with_label_values(&[&decision_str, "evaluate"])
+        .inc();
+    telemetry::TRUST_EVALUATION_DURATION_SECONDS
+        .with_label_values(&["evaluate"])
+        .observe(eval_secs);
 
     info!(
         user_id = %payload.user_id,

@@ -163,3 +163,27 @@ services:
       - "8081:8080"
     depends_on:
       - postgres
+
+  # ─── Loki (Log Aggregation) ────────────────────────────────────────────────────
+  loki:
+    image: grafana/loki:2.9.7
+    container_name: sm-loki
+    restart: unless-stopped
+    networks: [sentinelmark]
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # ─── Promtail (Log Shipper) ──────────────────────────────────────────────────
+  promtail:
+    image: grafana/promtail:2.9.7
+    container_name: sm-promtail
+    restart: unless-stopped
+    networks: [sentinelmark]
+    volumes:
+      - ./grafana/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki

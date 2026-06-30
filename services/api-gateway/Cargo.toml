@@ -7,6 +7,14 @@ edition = "2021"
 name = "api-gateway"
 path = "src/main.rs"
 
+[[bench]]
+name = "trust_engine"
+harness = false
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+
 [dependencies]
 sentinelmark-rs      = { workspace = true }
 storage-engine       = { workspace = true }
@@ -24,6 +32,9 @@ serde_json   = { workspace = true }
 sqlx         = { workspace = true }
 tracing      = { workspace = true }
 tracing-subscriber = { workspace = true }
+prometheus       = { workspace = true }
+lazy_static      = { workspace = true }
+
 uuid         = { workspace = true }
 chrono       = { workspace = true }
 thiserror    = { workspace = true }
@@ -34,4 +45,5 @@ governor         = { workspace = true }
 sha2              = { workspace = true }
 utoipa            = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
+
 
