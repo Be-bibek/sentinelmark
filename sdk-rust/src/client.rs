@@ -1,7 +1,7 @@
 use chrono::Utc;
 use reqwest::{
-    Client as ReqwestClient,
     header::{HeaderMap, HeaderValue},
+    Client as ReqwestClient,
 };
 use std::time::Duration;
 use uuid::Uuid;
