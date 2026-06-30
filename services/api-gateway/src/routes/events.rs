@@ -92,7 +92,7 @@ pub async fn handle_platform_event(
     .await
     .map_err(|e| PlatformError::DatabaseError(e.to_string()))?;
 
-    let (enabled, category) = match is_active_query {
+    let (_enabled, category) = match is_active_query {
         Some((enabled, category)) => {
             if !enabled {
                 return Err(PlatformError::ProductDisabled);
@@ -111,11 +111,11 @@ pub async fn handle_platform_event(
     // 3. Delegate validation and analysis to the adapter
     adapter
         .validate(&req.payload)
-        .map_err(|e| PlatformError::PayloadInvalid(e))?;
+        .map_err(PlatformError::PayloadInvalid)?;
 
     let analysis = adapter
         .analyze(&req.payload)
-        .map_err(|e| PlatformError::PayloadInvalid(e))?;
+        .map_err(PlatformError::PayloadInvalid)?;
 
     // 4. Context Engine evaluates the analysis to produce an Action Policy
     let policy = crate::adapters::ContextEngine::evaluate(&category, analysis);

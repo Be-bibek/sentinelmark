@@ -1,4 +1,4 @@
-use reqwest::{Client as ReqwestClient, header::{HeaderMap, HeaderValue, HeaderName}};
+use reqwest::{Client as ReqwestClient, header::{HeaderMap, HeaderValue}};
 use std::time::Duration;
 use uuid::Uuid;
 use chrono::Utc;

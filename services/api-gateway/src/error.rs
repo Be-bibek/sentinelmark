@@ -8,6 +8,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use utoipa::ToSchema;
 
+#[allow(dead_code)]
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
     #[error("Profile not found for user: {0}")]
@@ -28,6 +29,7 @@ pub enum AppError {
     BadRequest(String),
 }
 
+#[allow(dead_code)]
 #[derive(Debug, thiserror::Error)]
 pub enum PlatformError {
     #[error("Invalid API Key")]

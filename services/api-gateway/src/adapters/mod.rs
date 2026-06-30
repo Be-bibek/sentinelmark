@@ -1,6 +1,6 @@
 pub mod models;
 
-use models::{ActionPolicy, DicomTracePayload, EventIngestRequest, ProofTrace5GPayload, StellarFlowPayload};
+use models::{ActionPolicy, DicomTracePayload, ProofTrace5GPayload, StellarFlowPayload};
 use std::collections::HashMap;
 use std::sync::Arc;
 

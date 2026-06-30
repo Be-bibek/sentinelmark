@@ -42,7 +42,7 @@ fn bench_trust_evaluation_warm(c: &mut Criterion) {
     let sdk = SentinelMark::new();
     // Simulate a warm profile with established history
     let profile = BehaviorProfile {
-        event_count: 1000,
+        avg_transaction_amount: 50.0,
         ..Default::default()
     };
     let event = build_event();

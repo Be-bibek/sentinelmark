@@ -1,5 +1,5 @@
 # ─── Build Stage ───────────────────────────────────────────────────────────────
-FROM rust:1.78-slim-bullseye AS builder
+FROM rust:1.78-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -13,12 +13,13 @@ COPY Cargo.toml Cargo.lock ./
 COPY crates/ ./crates/
 COPY services/ ./services/
 COPY sdk-rust/ ./sdk-rust/
+COPY sdk/ ./sdk/
 
 # Build in release mode
 RUN cargo build --release -p api-gateway
 
 # ─── Runtime Stage ─────────────────────────────────────────────────────────────
-FROM debian:bullseye-slim AS runtime
+FROM debian:bookworm-slim AS runtime
 
 WORKDIR /app
 

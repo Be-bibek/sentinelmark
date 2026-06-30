@@ -27,6 +27,7 @@ use uuid::Uuid;
 use crate::{config::AuthMode, error::AppError, state::AppState};
 
 /// Resolved tenant/project context injected into every authenticated request's extensions.
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct AuthContext {
     pub tenant_id:  Uuid,
@@ -69,8 +70,8 @@ fn extract_bearer_str(headers: &axum::http::HeaderMap) -> Option<String> {
         .map(|s| s.trim().to_string())
 }
 
-fn extract_bearer<'a>(headers: &'a axum::http::HeaderMap) -> Option<&'a str> {
-    let value = headers.get("Authorization")?.to_str().ok()?;
+fn extract_bearer(headers: &axum::http::HeaderMap) -> Option<&str> {
+    let value = headers.get(axum::http::header::AUTHORIZATION)?.to_str().ok()?;
     value.strip_prefix("Bearer ")
 }
 
