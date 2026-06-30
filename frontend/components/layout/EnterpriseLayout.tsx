@@ -30,6 +30,7 @@ import {
   Bug,
   BookOpen,
   FlaskConical,
+  FileCheck,
 } from "lucide-react";
 import { useWebSocketStore, initializeWebSocket } from "@/stores/websocket-store";
 
@@ -49,6 +50,7 @@ export default function EnterpriseLayout({ children }: { children: React.ReactNo
     { name: "Dashboard",       href: "/dashboard",       icon: LayoutDashboard, group: "Platform Management" },
     { name: "Organizations",   href: "/organizations",   icon: Settings,        group: "Platform Management" },
     { name: "Projects",        href: "/projects",        icon: Settings,        group: "Platform Management" },
+    { name: "Policies",        href: "/policies",        icon: FileCheck,       group: "Platform Management" },
     { name: "Products",        href: "/products",        icon: Settings,        group: "Platform Management" },
     { name: "API Keys",        href: "/api-keys",        icon: Key,             group: "Platform Management" },
     { name: "Team",            href: "/team",            icon: Users,           group: "Platform Management" },
