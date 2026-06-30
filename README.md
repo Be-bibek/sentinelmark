@@ -12,34 +12,34 @@
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat-square" alt="Build Status" />
   <img src="https://img.shields.io/badge/tests-48%2F48%20passed-success.svg?style=flat-square" alt="E2E Tests" />
   <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.10%2B-3776AB.svg?style=flat-square&logo=python&logoColor=white" alt="Python" /></a>
-  <img src="https://img.shields.io/badge/phase-3.1%20hardened-800000.svg?style=flat-square" alt="Phase" />
+  <img src="https://img.shields.io/badge/phase-6%20enterprise%20ui-800000.svg?style=flat-square" alt="Phase" />
 </p>
 
-**SentinelMark** is a **Behavior-Aware Continuous Trust Infrastructure Platform**. What began as a cryptographic watermarking and forensic telemetry subsystem (v1) has evolved into a comprehensive security SDK (v2) designed for enterprise and fintech adoption.
+**SentinelMark** is a **Behavior-Aware Continuous Trust Infrastructure Platform**. Evolving from a cryptographic watermarking and forensic telemetry subsystem (v1) into a comprehensive, enterprise-grade security SDK (v2), SentinelMark redefines how systems evaluate user authenticity.
 
-While traditional authentication systems ask *"Did the user log in?"*, SentinelMark asks: **"Can the user still be trusted right now?"** 
+While traditional authentication mechanisms ask, *"Did the user log in?"*, SentinelMark continually assesses: **"Can the user still be trusted right now?"** 
 
-By fusing long-term static hardware secrets with live, continuous behavioral entropy snapshots, SentinelMark ensures that emitted telemetry cannot be forged, replayed, or fabricated.
+By fusing long-term static hardware secrets with live, continuous behavioral entropy snapshots, SentinelMark ensures that emitted telemetry cannot be forged, replayed, or fabricated, providing an unshakeable foundation for high-stakes digital environments.
 
 ---
 
 ## 🌟 SentinelMark v2: Continuous Trust Infrastructure SDK
 
-In **v2**, SentinelMark evolved into a pure, deterministic, blockchain-agnostic trust authorization layer. External systems (such as StellarFlow treasuries or enterprise identity gateways) consume SentinelMark to dynamically authorize high-value actions based on real-time behavior.
+In **v2**, SentinelMark has matured into a robust, deterministic, and blockchain-agnostic trust authorization layer. External enterprise systems—such as automated treasuries, identity gateways, and high-security workflows—consume SentinelMark to dynamically authorize critical actions based on real-time behavior.
 
-The architecture is powered by 7 deterministic Rust engines:
+The architecture is driven by 7 deterministic Rust engines:
 
 | Engine | Responsibility |
 |---|---|
-| **Identity Engine** | Detects impossible-travel, new device footprints, and credential reuse signals. |
-| **Workflow Engine** | Tracks session action sequences and detects anomalous workflow deviations. |
-| **Behavior Engine** | Maintains behavioral profiles (typical hours, geo-regions, transaction volumes). |
-| **Risk Engine** | Converts deviations into deterministic, weighted 0.0-1.0 Risk Assessments. |
-| **Trust Engine** | Inverts and scales risk into a dynamic Trust Score. |
-| **Policy Engine** | Enforces strict bounds (`Allow`, `RequireMFA`, `RequireApproval`, `Block`) + Multi-Sig. |
-| **Explainability Engine** | Generates human-readable, compliance-ready narratives for every decision. |
+| **Identity Engine** | Detects impossible-travel scenarios, novel device footprints, and credential reuse signals. |
+| **Workflow Engine** | Tracks session action sequences and identifies anomalous workflow deviations. |
+| **Behavior Engine** | Maintains historical behavioral profiles (typical usage hours, geolocation regions, and transaction volumes). |
+| **Risk Engine** | Quantifies deviations into deterministic, mathematically weighted Risk Assessments (0.0–1.0). |
+| **Trust Engine** | Inverts and scales raw risk into a dynamic, actionable Trust Score. |
+| **Policy Engine** | Enforces strict, customizable boundaries (`Allow`, `RequireMFA`, `RequireApproval`, `Block`) via an Abstract Syntax Tree (AST). |
+| **Explainability Engine** | Generates human-readable, compliance-ready narratives justifying every automated decision. |
 
-> **Integration:** Deployed primarily as a **Rust SDK** (`sentinelmark-rs`), with a fully-featured **REST API Gateway** (Axum) acting as a deployment wrapper.
+> **Integration:** Delivered as a highly optimized **Rust SDK** (`sentinelmark-rs`), wrapped in a fully-featured **REST API Gateway** (Axum) for seamless enterprise deployment, alongside a modern **Next.js Enterprise Dashboard**.
 
 ---
 
@@ -57,7 +57,7 @@ The derivation equation is defined as:
 $$W_i = \text{HKDF-SHA256}(K_{\text{static}} \parallel \text{BehaviorFingerprint}_i \parallel H_{\text{prev}})$$
 
 Where:
-* **$K_{\text{static}}$**: The long-term static device secret (zeroized securely from stack/heap post-derivation).
+* **$K_{\text{static}}$**: The long-term static device secret (securely zeroized from stack/heap post-derivation).
 * **$\text{BehaviorFingerprint}_i$**: A deterministic serialization of the live rolling behavioral entropy snapshot (CPU scheduling jitter, thread allocations, virtual/physical memory boundaries).
 * **$H_{\text{prev}}$**: The SHA-256 hash commitment linking the current event to its immediate predecessor, establishing an unforgeable, append-only chronological hash chain.
 
@@ -100,7 +100,7 @@ flowchart TD
 </div>
 <br/>
 
-The architecture is fully modularized and split across highly specialized sub-engines built entirely in safe Rust (with strictly audited constant-time FFI primitives).
+The architecture is highly modularized and distributed across specialized sub-engines built entirely in safe Rust, utilizing strictly audited constant-time FFI primitives.
 
 ```text
 sentinelmark_core (Rust Core Engine)
@@ -119,34 +119,13 @@ verify-py (Python Verification Authority)
 +-- trust        -- Deterministic scalar trust scoring evaluation engine
 ```
 
-### Phase 1 Features
-* **Behavioral Entropy Sampler**: Captures live metrics using `sysinfo` v0.30+ alongside high-resolution OS scheduler jitter measurement. Jitter acts as a stochastic anti-tampering constraint.
+### Advanced Security Features
+* **Behavioral Entropy Sampler**: Captures live metrics alongside high-resolution OS scheduler jitter measurement. Jitter acts as a stochastic anti-tampering constraint.
 * **Append-Only Hash Chaining**: Prevents log reordering, deletion, or insertion attacks. Any structural manipulation permanently corrupts subsequent chain linkages.
-* **Deterministic Dual-Serialization**: Canonical JSON (`serde_json`) for human-inspectable REST delivery; zero-copy deserialization archives (`rkyv`) for extreme throughput benchmarking.
-* **Pre-Image Projection Fix**: Eliminates cryptographic circularity by projecting the event schema to exclude `current_hash` during its own pre-image calculation, guaranteeing exact verification determinism.
-
-### Phase 2 Features
-* **Hardened Replay Protection Engine**:
-  * **O(1) Nonce Cache**: Eagerly flags exact payload collisions using 256-bit CSPRNG nonces.
-  * **Timestamp Drift Validation**: Enforces tight arrival windows ($\pm 30\text{s}$) to reject delayed re-transmissions and future-skewed packets.
-  * **O(log N) Priority Queue Eviction**: Maintains a self-pruning `BTreeSet` keyed by timestamp to automatically garbage collect stale nonces, eliminating arbitrary memory expansion (OOM resilience).
-* **Async Telemetry Transport Layer**:
-  * **Immutable Envelopes**: Pre-serializes canonical payloads at the exact moment of event finalization. Retries never invoke `serde` routines, protecting nonces and timestamps from shifting across TCP reattempts.
-  * **Resilient Worker Queue**: Non-blocking `tokio::sync::mpsc` queue decoupling generation loops from network bottlenecks.
-  * **Deterministic Backoff**: Applies base-multiplied exponential retry delays strictly on transient backend status codes (`5xx`, `429`).
-* **Phase 3 — Stateful Python Verification Authority (`verify-py`)**:
-  * **4-Stage Forensic Pipeline**: Structural → Cryptographic Integrity → Replay Validation → Behavioral Authenticity. Each stage fails fast and persists the rejection verdict before aborting.
-  * **SQLite Audit Ledger**: Append-only `TelemetryLog` table — every ingest attempt (verified or rejected) is permanently recorded. No `UPDATE`/`DELETE` on forensic evidence.
-  * **Crash-Resilient Nonce Cache**: `NonceCache` backed by SQLite WAL-mode replaces the ephemeral in-memory set, closing the process-restart replay window permanently.
-  * **Cross-Language Binary Parity**: `struct.pack("<IQQIQQ")` in Python maps exactly to Rust's `.to_le_bytes()` field-by-field serialization for deterministic `BehaviorFingerprint_i` computation.
-  * **Constant-Time Watermark Verification**: `hmac.compare_digest()` via OpenSSL C-bindings neutralizes timing oracle attacks against `K_static`.
-  * **Statistical Behavioral Authenticity Engine**: Z-score analysis (`Z = |x - μ| / σ`) over a 50-event rolling window detects entropy collapse (σ ≈ 0) and distribution-shift anomalies in CPU, memory, and jitter metrics.
-  * **Adversarial Attack Simulation Framework**: Scripted replay, forgery, and entropy-collapse simulations in `benchmarks/attacks/` generating CSV results for IEEE figure reproduction.
-* **Phase 3.1 — Protocol Hardening & Causal Ordering**:
-  * **Monotonic Sequence Architecture**: Fuses a strict `sequence_number` ($u64$) into the event derivation and pre-image hashing to ensure chain integrity survives distributed network jitter and out-of-order packet delivery.
-  * **Forensic Schema Normalization**: Flattens raw payloads into explicitly indexed relational columns (`current_hash`, `prev_hash`, `cpu_usage`, `memory_usage`, `timing_jitter`), eliminating synchronous O(N) JSON deserialization overhead during hot-path verification.
-  * **Bit-Perfect Deterministic Scoring**: Operates exclusively on scaled integer math (`trust_score_x1000`) within the evaluation layer, neutralizing cross-platform IEEE 754 floating-point non-determinism.
-  * **Volumetric Stress Benchmarks**: Evaluates DB insertion locks and sliding-window pruning logic under extreme adversarial concurrency (10,000+ flood events/sec).
+* **Hardened Replay Protection**: Features O(1) Nonce Caches, tight timestamp drift validation, and self-pruning queues to eliminate arbitrary memory expansion.
+* **Async Telemetry Transport Layer**: Pre-serializes canonical payloads to protect nonces and timestamps from shifting across TCP reattempts.
+* **Cross-Language Binary Parity**: Ensures deterministic serialization between Python and Rust environments, critical for `BehaviorFingerprint_i` computation.
+* **Adversarial Attack Simulation**: Built-in frameworks simulate replay, forgery, and entropy-collapse vectors to continuously validate system resilience.
 
 ---
 
@@ -175,36 +154,32 @@ xychart-beta
 ## 📦 Getting Started
 
 ### Prerequisites
-* **Rust** Toolchain `1.75` or higher — for `core-rs`.
-* **Python** `3.10+` and `pip` / `poetry` — for `verify-py`.
-* Platform compilation tools (Windows MSVC, Linux GNU, or macOS LLVM).
+* **Rust** Toolchain `1.75` or higher — for the Core Engine and API Gateway.
+* **Python** `3.10+` and `pip` / `poetry` — for Legacy Verification scripts.
+* **Node.js** `18+` — for the Next.js Enterprise Frontend.
 
-### Rust Core Engine
+### Rust API Gateway & SDK
 ```bash
-cd core-rs
-cargo test --workspace   # Run all 36 unit + integration tests
-cargo bench              # Run Criterion benchmarks
+# Run tests for the Rust SDK and Policy Engine
+cargo test --workspace
+
+# Start the Axum API Gateway
+cargo run -p api-gateway
 ```
 
-### Python Verification Authority
+### Next.js Enterprise Frontend
 ```bash
-cd verify-py
-pip install fastapi uvicorn pydantic cryptography sqlalchemy numpy scipy
-pip install pytest pytest-asyncio httpx   # Dev dependencies
-
-# Run test suite (17 tests covering all 7 attack vectors)
-python -m pytest tests/ -v
-
-# Start the verification server
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+cd frontend
+npm install
+npm run dev
+# The Policy Builder and Dashboard will be available at http://localhost:3000
 ```
 
-### Adversarial Attack Simulations
+### Adversarial Attack Simulations (Python)
 ```bash
 cd verify-py
 python benchmarks/attacks/sim_replay.py          # ATK-01: Replay attack
 python benchmarks/attacks/sim_entropy_collapse.py # ATK-02: Forgery attack
-python benchmarks/attacks/sim_latency.py          # Crypto latency baseline
 # Results written to benchmarks/results/
 ```
 
@@ -281,21 +256,19 @@ Want to see SentinelMark in action? Follow these exact steps in your terminal to
 
 ### 1. Compile-Time Safety Guarantee (Rust Core)
 ```bash
-cd core-rs
 cargo check
 ```
 **What this proves:** Zero memory safety issues or undefined behavior. The Rust compiler enforces our security guarantees at compile time.
 
 ### 2. Cryptographic Subsystem Verification
 ```bash
-cd core-rs
 cargo test --workspace
 ```
 **What this proves:** All core cryptographic unit tests pass (hash chain integrity, watermark derivation, replay detection).
 
 ### 3. Defeating 7 Attack Vectors (Python Verifier)
 ```bash
-cd ../verify-py
+cd verify-py
 python -m pytest tests/ -v
 ```
 **What this proves:** The system correctly handles every major attack scenario:
