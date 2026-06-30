@@ -14,6 +14,7 @@ COPY crates/ ./crates/
 COPY services/ ./services/
 COPY sdk-rust/ ./sdk-rust/
 COPY sdk/ ./sdk/
+COPY migrations/ ./migrations/
 
 # Build in release mode
 RUN cargo build --release -p api-gateway
