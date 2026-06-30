@@ -1,15 +1,15 @@
-﻿//! Storage Engine — SQLx-backed PostgreSQL repository implementations.
+//! Storage Engine — SQLx-backed PostgreSQL repository implementations.
 //!
 //! Uses sqlx::query (non-macro) for full offline compilation compatibility.
 //! No live database required for cargo check / cargo build.
 
-use std::collections::HashSet;
-use sqlx::PgPool;
-use uuid::Uuid;
-use chrono::{DateTime, Utc};
-use sentinelmark_core::UserId;
 use audit_engine::AuditEntry;
 use behavior_engine::BehaviorProfile;
+use chrono::{DateTime, Utc};
+use sentinelmark_core::UserId;
+use sqlx::PgPool;
+use std::collections::HashSet;
+use uuid::Uuid;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TRAITS
@@ -18,7 +18,11 @@ use behavior_engine::BehaviorProfile;
 #[async_trait::async_trait]
 pub trait ProfileRepository: Send + Sync {
     async fn get_profile(&self, user_id: &UserId) -> Result<Option<BehaviorProfile>, StorageError>;
-    async fn save_profile(&self, user_id: &UserId, profile: &BehaviorProfile) -> Result<(), StorageError>;
+    async fn save_profile(
+        &self,
+        user_id: &UserId,
+        profile: &BehaviorProfile,
+    ) -> Result<(), StorageError>;
     async fn ensure_user(&self, user_id: &UserId) -> Result<(), StorageError>;
 }
 
@@ -41,7 +45,11 @@ pub trait AuditRepository: Send + Sync {
 
 #[async_trait::async_trait]
 pub trait TelemetryRepository: Send + Sync {
-    async fn insert_event(&self, user_id: &UserId, event: &TelemetryRow) -> Result<Uuid, StorageError>;
+    async fn insert_event(
+        &self,
+        user_id: &UserId,
+        event: &TelemetryRow,
+    ) -> Result<Uuid, StorageError>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,12 +113,10 @@ impl PostgresStorage {
 #[async_trait::async_trait]
 impl ProfileRepository for PostgresStorage {
     async fn ensure_user(&self, user_id: &UserId) -> Result<(), StorageError> {
-        sqlx::query(
-            "INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING",
-        )
-        .bind(&user_id.0)
-        .execute(&self.pool)
-        .await?;
+        sqlx::query("INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING")
+            .bind(&user_id.0)
+            .execute(&self.pool)
+            .await?;
         Ok(())
     }
 
@@ -202,40 +208,63 @@ impl AuditRepository for PostgresStorage {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<AuditRow>, StorageError> {
-        let rows: Vec<(Uuid, String, f64, f64, String, serde_json::Value, String, String, Option<i64>, DateTime<Utc>)> =
-            sqlx::query_as(
-                r#"SELECT id, user_id, trust_score, risk_score, decision,
+        let rows: Vec<(
+            Uuid,
+            String,
+            f64,
+            f64,
+            String,
+            serde_json::Value,
+            String,
+            String,
+            Option<i64>,
+            DateTime<Utc>,
+        )> = sqlx::query_as(
+            r#"SELECT id, user_id, trust_score, risk_score, decision,
                           anomalies, policy_decision, explanation,
                           evaluation_time_ms, created_at
                    FROM audit_logs
                    WHERE user_id = $1
                    ORDER BY created_at DESC
                    LIMIT $2 OFFSET $3"#,
-            )
-            .bind(&user_id.0)
-            .bind(limit)
-            .bind(offset)
-            .fetch_all(&self.pool)
-            .await?;
+        )
+        .bind(&user_id.0)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(&self.pool)
+        .await?;
 
         let result = rows
             .into_iter()
-            .map(|(id, uid, trust, risk, decision, anomalies_val, policy, explanation, eval_ms, created_at)| {
-                let anomalies: Vec<String> =
-                    serde_json::from_value(anomalies_val).unwrap_or_default();
-                AuditRow {
+            .map(
+                |(
                     id,
-                    user_id: uid,
-                    trust_score: trust,
-                    risk_score: risk,
+                    uid,
+                    trust,
+                    risk,
                     decision,
-                    anomalies,
-                    policy_decision: policy,
+                    anomalies_val,
+                    policy,
                     explanation,
-                    evaluation_time_ms: eval_ms,
+                    eval_ms,
                     created_at,
-                }
-            })
+                )| {
+                    let anomalies: Vec<String> =
+                        serde_json::from_value(anomalies_val).unwrap_or_default();
+                    AuditRow {
+                        id,
+                        user_id: uid,
+                        trust_score: trust,
+                        risk_score: risk,
+                        decision,
+                        anomalies,
+                        policy_decision: policy,
+                        explanation,
+                        evaluation_time_ms: eval_ms,
+                        created_at,
+                    }
+                },
+            )
             .collect();
 
         Ok(result)

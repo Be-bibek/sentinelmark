@@ -3,10 +3,10 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 #[allow(dead_code)]
 #[derive(Debug, thiserror::Error)]
@@ -70,12 +70,32 @@ pub struct PlatformErrorResponse {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, code, message) = match &self {
-            AppError::ProfileNotFound(u) => (StatusCode::NOT_FOUND, "SM9001", format!("Profile not found for user: {u}")),
-            AppError::UserNotFound(u) => (StatusCode::NOT_FOUND, "SM9002", format!("User not found: {u}")),
+            AppError::ProfileNotFound(u) => (
+                StatusCode::NOT_FOUND,
+                "SM9001",
+                format!("Profile not found for user: {u}"),
+            ),
+            AppError::UserNotFound(u) => (
+                StatusCode::NOT_FOUND,
+                "SM9002",
+                format!("User not found: {u}"),
+            ),
             AppError::Validation(msg) => (StatusCode::BAD_REQUEST, "SM2001", msg.clone()),
-            AppError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "SM5001", "A database error occurred.".to_string()),
-            AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "SM1001", "Authentication required.".to_string()),
-            AppError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "SM8001", "An internal error occurred.".to_string()),
+            AppError::Database(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "SM5001",
+                "A database error occurred.".to_string(),
+            ),
+            AppError::Unauthorized => (
+                StatusCode::UNAUTHORIZED,
+                "SM1001",
+                "Authentication required.".to_string(),
+            ),
+            AppError::Internal(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "SM8001",
+                "An internal error occurred.".to_string(),
+            ),
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "SM9003", msg.clone()),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "SM2002", msg.clone()),
         };
@@ -99,14 +119,32 @@ impl IntoResponse for PlatformError {
             PlatformError::ProjectSuspended => (StatusCode::FORBIDDEN, "SM1101", self.to_string()),
             PlatformError::TenantSuspended => (StatusCode::FORBIDDEN, "SM1102", self.to_string()),
             PlatformError::PayloadInvalid(m) => (StatusCode::BAD_REQUEST, "SM2001", m.clone()),
-            PlatformError::TrustEngineFailure(m) => (StatusCode::INTERNAL_SERVER_ERROR, "SM3001", m.clone()),
-            PlatformError::UnsupportedSdkVersion => (StatusCode::BAD_REQUEST, "SM4001", self.to_string()),
-            PlatformError::DatabaseError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "SM5001", "A database error occurred".to_string()),
+            PlatformError::TrustEngineFailure(m) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "SM3001", m.clone())
+            }
+            PlatformError::UnsupportedSdkVersion => {
+                (StatusCode::BAD_REQUEST, "SM4001", self.to_string())
+            }
+            PlatformError::DatabaseError(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "SM5001",
+                "A database error occurred".to_string(),
+            ),
             PlatformError::ProductDisabled => (StatusCode::FORBIDDEN, "SM6001", self.to_string()),
             PlatformError::ProductNotMapped => (StatusCode::FORBIDDEN, "SM6002", self.to_string()),
-            PlatformError::UnsupportedProduct(m) => (StatusCode::BAD_REQUEST, "SM6003", format!("Unsupported Product: {}", m)),
-            PlatformError::RateLimitExceeded => (StatusCode::TOO_MANY_REQUESTS, "SM7001", self.to_string()),
-            PlatformError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, "SM8001", self.to_string()),
+            PlatformError::UnsupportedProduct(m) => (
+                StatusCode::BAD_REQUEST,
+                "SM6003",
+                format!("Unsupported Product: {}", m),
+            ),
+            PlatformError::RateLimitExceeded => {
+                (StatusCode::TOO_MANY_REQUESTS, "SM7001", self.to_string())
+            }
+            PlatformError::InternalError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "SM8001",
+                self.to_string(),
+            ),
         };
 
         let body = PlatformErrorResponse {

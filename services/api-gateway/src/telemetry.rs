@@ -5,8 +5,8 @@
 
 use lazy_static::lazy_static;
 use prometheus::{
-    register_counter_vec, register_histogram_vec,
-    CounterVec, HistogramVec, Gauge, Encoder, TextEncoder,
+    register_counter_vec, register_histogram_vec, CounterVec, Encoder, Gauge, HistogramVec,
+    TextEncoder,
 };
 
 lazy_static! {
@@ -65,7 +65,8 @@ pub fn gather_metrics() -> String {
     let encoder = TextEncoder::new();
     let metric_families = prometheus::gather();
     let mut buffer = Vec::new();
-    encoder.encode(&metric_families, &mut buffer)
+    encoder
+        .encode(&metric_families, &mut buffer)
         .expect("metrics encoding failed");
     String::from_utf8(buffer).expect("metrics utf8 encoding failed")
 }

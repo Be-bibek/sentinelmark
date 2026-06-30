@@ -1,9 +1,9 @@
-﻿//! Health endpoints: /api/v1/health/live and /api/v1/health/ready
+//! Health endpoints: /api/v1/health/live and /api/v1/health/ready
 
-use axum::{extract::State, Json};
-use serde::Serialize;
-use chrono::Utc;
 use crate::state::AppState;
+use axum::{extract::State, Json};
+use chrono::Utc;
+use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct LivenessResponse {

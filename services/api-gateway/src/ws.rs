@@ -1,18 +1,18 @@
-﻿//! WebSocket endpoint and typed event model.
+//! WebSocket endpoint and typed event model.
 //! Broadcasts structured trust events to all connected clients.
 
+use crate::state::AppState;
+use axum::extract::ws::{Message, WebSocket};
 use axum::{
     extract::{State, WebSocketUpgrade},
     response::Response,
 };
-use axum::extract::ws::{WebSocket, Message};
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::sync::broadcast;
 use tracing::{info, warn};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use crate::state::AppState;
+use uuid::Uuid;
 
 /// Global count of connected WebSocket clients.
 pub static CONNECTED_CLIENTS: AtomicUsize = AtomicUsize::new(0);
@@ -68,16 +68,16 @@ pub enum WsEvent {
     },
 }
 
-pub async fn ws_handler(
-    ws: WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> Response {
+pub async fn ws_handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> Response {
     ws.on_upgrade(move |socket| handle_socket(socket, state.ws_tx.subscribe()))
 }
 
 async fn handle_socket(mut socket: WebSocket, mut rx: broadcast::Receiver<WsEvent>) {
     CONNECTED_CLIENTS.fetch_add(1, Ordering::Relaxed);
-    info!("WebSocket client connected. Total: {}", CONNECTED_CLIENTS.load(Ordering::Relaxed));
+    info!(
+        "WebSocket client connected. Total: {}",
+        CONNECTED_CLIENTS.load(Ordering::Relaxed)
+    );
 
     // Send a welcome message
     let welcome = serde_json::json!({
@@ -85,7 +85,11 @@ async fn handle_socket(mut socket: WebSocket, mut rx: broadcast::Receiver<WsEven
         "message": "SentinelMark WebSocket stream active",
         "timestamp": Utc::now().to_rfc3339()
     });
-    if socket.send(Message::Text(welcome.to_string())).await.is_err() {
+    if socket
+        .send(Message::Text(welcome.to_string()))
+        .await
+        .is_err()
+    {
         CONNECTED_CLIENTS.fetch_sub(1, Ordering::Relaxed);
         return;
     }
@@ -126,5 +130,8 @@ async fn handle_socket(mut socket: WebSocket, mut rx: broadcast::Receiver<WsEven
     }
 
     CONNECTED_CLIENTS.fetch_sub(1, Ordering::Relaxed);
-    info!("WebSocket client disconnected. Total: {}", CONNECTED_CLIENTS.load(Ordering::Relaxed));
+    info!(
+        "WebSocket client disconnected. Total: {}",
+        CONNECTED_CLIENTS.load(Ordering::Relaxed)
+    );
 }

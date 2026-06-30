@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use risk_engine::RiskAssessment;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrustScore {

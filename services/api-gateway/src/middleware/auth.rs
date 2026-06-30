@@ -30,7 +30,7 @@ use crate::{config::AuthMode, error::AppError, state::AppState};
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct AuthContext {
-    pub tenant_id:  Uuid,
+    pub tenant_id: Uuid,
     pub project_id: Uuid,
     pub api_key_id: Uuid,
     pub key_prefix: String,
@@ -71,7 +71,10 @@ fn extract_bearer_str(headers: &axum::http::HeaderMap) -> Option<String> {
 }
 
 fn extract_bearer(headers: &axum::http::HeaderMap) -> Option<&str> {
-    let value = headers.get(axum::http::header::AUTHORIZATION)?.to_str().ok()?;
+    let value = headers
+        .get(axum::http::header::AUTHORIZATION)?
+        .to_str()
+        .ok()?;
     value.strip_prefix("Bearer ")
 }
 

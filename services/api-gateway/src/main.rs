@@ -1,44 +1,43 @@
 #![allow(clippy::type_complexity)]
 
-mod config;
-mod error;
-mod response;
-mod state;
-mod ws;
-mod middleware;
-mod routes;
 mod adapters;
+mod config;
 mod docs;
+mod error;
+mod middleware;
+mod response;
+mod routes;
+mod state;
 mod telemetry;
+mod ws;
 
-
-use std::sync::Arc;
-use std::net::SocketAddr;
-use tokio::net::TcpListener;
-use tokio::sync::broadcast;
-use tokio::signal;
-use axum::{
-    Router,
-    routing::{get, post},
-};
-use tower_http::{
-    cors::{CorsLayer, Any},
-    trace::TraceLayer,
-    timeout::TimeoutLayer,
-    compression::CompressionLayer,
-    request_id::{SetRequestIdLayer, PropagateRequestIdLayer},
-};
 use axum::http::{HeaderName, Method};
-use std::time::Duration;
-use tracing::{info, error};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use sqlx::postgres::PgPoolOptions;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::net::TcpListener;
+use tokio::signal;
+use tokio::sync::broadcast;
+use tower_http::{
+    compression::CompressionLayer,
+    cors::{Any, CorsLayer},
+    request_id::{PropagateRequestIdLayer, SetRequestIdLayer},
+    timeout::TimeoutLayer,
+    trace::TraceLayer,
+};
+use tracing::{error, info};
 
 use crate::config::Config;
-use crate::state::AppState;
 use crate::middleware::request_id::MakeUuidRequestId;
+use crate::state::AppState;
 use crate::ws::{ws_handler, WsEvent};
-use storage_engine::PostgresStorage;
 use sentinelmark_rs::SentinelMark;
+use storage_engine::PostgresStorage;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -153,30 +152,44 @@ async fn main() {
 
     let api_v1_public = Router::new()
         // Health & infra — no auth required (Railway uses these for uptime checks)
-        .route("/health/live",  get(routes::health::health_live))
+        .route("/health/live", get(routes::health::health_live))
         .route("/health/ready", get(routes::health::health_ready))
-        .route("/version",      get(routes::version::version))
-        .route("/metrics",      get(routes::metrics::metrics))
+        .route("/version", get(routes::version::version))
+        .route("/metrics", get(routes::metrics::metrics))
         .with_state(state.clone());
 
     let api_v1_protected = Router::new()
         // Core API — all require a valid API key
-        .route("/evaluate",                  post(routes::evaluate::evaluate))
-        .route("/telemetry",                 post(routes::telemetry::ingest_telemetry))
-        .route("/behavior-profile/:user_id", get(routes::behavior_profile::get_behavior_profile))
-        .route("/audit/:user_id",            get(routes::audit::get_audit))
-        .route("/events",                    post(routes::events::handle_platform_event))
-        
+        .route("/evaluate", post(routes::evaluate::evaluate))
+        .route("/telemetry", post(routes::telemetry::ingest_telemetry))
+        .route(
+            "/behavior-profile/:user_id",
+            get(routes::behavior_profile::get_behavior_profile),
+        )
+        .route("/audit/:user_id", get(routes::audit::get_audit))
+        .route("/events", post(routes::events::handle_platform_event))
         // Developer Portal APIs
-        .route("/api-keys",                  get(routes::api_keys::list_keys).post(routes::api_keys::create_key))
-        .route("/api-keys/:id",              axum::routing::delete(routes::api_keys::revoke_key))
-        .route("/events-explorer",           get(routes::events_explorer::list_events))
-        .route("/products",                  get(routes::products::list_products))
-        .route("/products/:product_slug/toggle", post(routes::products::toggle_product))
-        .route("/projects/current",          get(routes::projects::get_project))
-        .route("/team",                      get(routes::team::list_team))
-        .route("/organizations/current",     get(routes::tenants::get_tenant))
-        .route("/usage",                     get(routes::usage::get_usage_metrics))
+        .route(
+            "/api-keys",
+            get(routes::api_keys::list_keys).post(routes::api_keys::create_key),
+        )
+        .route(
+            "/api-keys/:id",
+            axum::routing::delete(routes::api_keys::revoke_key),
+        )
+        .route(
+            "/events-explorer",
+            get(routes::events_explorer::list_events),
+        )
+        .route("/products", get(routes::products::list_products))
+        .route(
+            "/products/:product_slug/toggle",
+            post(routes::products::toggle_product),
+        )
+        .route("/projects/current", get(routes::projects::get_project))
+        .route("/team", get(routes::team::list_team))
+        .route("/organizations/current", get(routes::tenants::get_tenant))
+        .route("/usage", get(routes::usage::get_usage_metrics))
         // WebSocket
         .route("/ws", get(ws_handler))
         .layer(axum::middleware::from_fn_with_state(
@@ -194,7 +207,10 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api/v1/openapi.json", api_doc))
         // Fallback for bare /health for Railway healthchecks
         .route("/health", get(|| async { "ok" }))
-        .layer(SetRequestIdLayer::new(x_request_id.clone(), MakeUuidRequestId))
+        .layer(SetRequestIdLayer::new(
+            x_request_id.clone(),
+            MakeUuidRequestId,
+        ))
         .layer(PropagateRequestIdLayer::new(x_request_id))
         .layer(TraceLayer::new_for_http())
         .layer(CompressionLayer::new())
@@ -258,7 +274,9 @@ async fn connect_with_retry(database_url: &str, max_retries: u32) -> sqlx::PgPoo
 /// Graceful shutdown: waits for CTRL+C or SIGTERM.
 async fn shutdown_signal() {
     let ctrl_c = async {
-        signal::ctrl_c().await.expect("Failed to install CTRL+C handler");
+        signal::ctrl_c()
+            .await
+            .expect("Failed to install CTRL+C handler");
     };
 
     #[cfg(unix)]

@@ -19,7 +19,7 @@ COPY sdk/ ./sdk/
 RUN cargo build --release -p api-gateway
 
 # ─── Runtime Stage ─────────────────────────────────────────────────────────────
-FROM debian:bookworm-slim AS runtime
+FROM ubuntu:24.04 AS runtime
 
 WORKDIR /app
 

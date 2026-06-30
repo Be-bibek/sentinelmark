@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use sentinelmark_core::UserId;
 use policy_engine::PolicyDecision;
+use sentinelmark_core::UserId;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuditEntry {

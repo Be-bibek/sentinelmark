@@ -1,4 +1,4 @@
-use sdk_rust::{SentinelMark, EvaluateOptions};
+use sdk_rust::{EvaluateOptions, SentinelMark};
 use serde_json::json;
 use std::env;
 
@@ -6,9 +6,7 @@ use std::env;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = env::var("SENTINELMARK_API_KEY").unwrap_or_else(|_| "sm_live_12345".to_string());
 
-    let client = SentinelMark::builder(&api_key)
-        .debug(true)
-        .build()?;
+    let client = SentinelMark::builder(&api_key).debug(true).build()?;
 
     let options = EvaluateOptions {
         product_slug: "stellarflow".to_string(),

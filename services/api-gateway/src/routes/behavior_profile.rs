@@ -1,6 +1,9 @@
-﻿//! GET /api/v1/behavior-profile/:user_id — Returns full behavior profile from PostgreSQL.
+//! GET /api/v1/behavior-profile/:user_id — Returns full behavior profile from PostgreSQL.
 
-use axum::{extract::{State, Path}, http::HeaderMap};
+use axum::{
+    extract::{Path, State},
+    http::HeaderMap,
+};
 use serde::Serialize;
 use tracing::info;
 

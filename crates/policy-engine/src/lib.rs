@@ -37,7 +37,9 @@ impl PolicyEngine {
                 decision: PolicyDecision::Allow,
                 trust_score: score,
                 threshold_applied: "Trust > 0.85",
-                rationale: "High trust context established. Behavioral profile matches all baselines.".to_string(),
+                rationale:
+                    "High trust context established. Behavioral profile matches all baselines."
+                        .to_string(),
                 requires_multi_sig: false,
             }
         } else if score > 0.65 {
@@ -61,7 +63,9 @@ impl PolicyEngine {
                 decision: PolicyDecision::Block,
                 trust_score: score,
                 threshold_applied: "Trust ≤ 0.45",
-                rationale: "Critically low trust. Session blocked. Security operations must be notified.".to_string(),
+                rationale:
+                    "Critically low trust. Session blocked. Security operations must be notified."
+                        .to_string(),
                 requires_multi_sig: false,
             }
         }
@@ -74,7 +78,11 @@ mod tests {
     use trust_engine::TrustScore;
 
     fn trust(score: f64) -> TrustScore {
-        TrustScore { score, confidence: 0.9, reasons: vec![] }
+        TrustScore {
+            score,
+            confidence: 0.9,
+            reasons: vec![],
+        }
     }
 
     #[test]

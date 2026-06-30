@@ -4,16 +4,16 @@
 //! Detects impossible-travel scenarios and credential anomalies.
 //! Pure, deterministic — no network I/O.
 
-use serde::{Deserialize, Serialize};
-use sentinelmark_core::{UserId, DeviceId};
 use chrono::{DateTime, Utc};
+use sentinelmark_core::{DeviceId, UserId};
+use serde::{Deserialize, Serialize};
 
 /// Trust classification for a specific device.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum DeviceTrustLevel {
-    Trusted,   // Previously seen, no anomalies
-    Unknown,   // First time seen
-    Suspicious,// Previously flagged or showing anomalous signals
+    Trusted,    // Previously seen, no anomalies
+    Unknown,    // First time seen
+    Suspicious, // Previously flagged or showing anomalous signals
 }
 
 /// A snapshot of an authenticated identity's context.
@@ -58,8 +58,7 @@ impl IdentityEngine {
         let is_new_device = !state.known_device_ids.contains(&claim.device_id.0);
 
         // Credential reuse risk: same IP but different device fingerprint
-        let is_credential_reuse_risk =
-            claim.ip_address == state.last_ip && is_new_device;
+        let is_credential_reuse_risk = claim.ip_address == state.last_ip && is_new_device;
 
         let mut parts = vec![];
         if is_impossible_travel {
@@ -72,7 +71,9 @@ impl IdentityEngine {
             parts.push("Unrecognized device fingerprint.".to_string());
         }
         if is_credential_reuse_risk {
-            parts.push("Same IP with an unrecognized device may indicate credential reuse.".to_string());
+            parts.push(
+                "Same IP with an unrecognized device may indicate credential reuse.".to_string(),
+            );
         }
         if parts.is_empty() {
             parts.push("Identity context matches known state.".to_string());

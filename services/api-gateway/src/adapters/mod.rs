@@ -8,7 +8,7 @@ use std::sync::Arc;
 pub trait ProductAdapter: Send + Sync {
     /// Validates the structure and integrity of the raw payload
     fn validate(&self, payload: &serde_json::Value) -> Result<(), String>;
-    
+
     /// Normalizes and returns domain-specific risk signals
     fn analyze(&self, payload: &serde_json::Value) -> Result<AnalysisResult, String>;
 }
@@ -30,20 +30,36 @@ impl ContextEngine {
         let action = match category {
             "fintech" => {
                 // Financial products prioritize MFA on moderate risk
-                if analysis.risk_score > 0.80 { "BLOCK" }
-                else if analysis.risk_score > 0.50 { "MFA" }
-                else { "ALLOW" }
-            },
+                if analysis.risk_score > 0.80 {
+                    "BLOCK"
+                } else if analysis.risk_score > 0.50 {
+                    "MFA"
+                } else {
+                    "ALLOW"
+                }
+            }
             "medical" => {
                 // Medical products are extremely strict on any anomaly (Zero Trust)
-                if analysis.risk_score > 0.10 { "BLOCK" } else { "ALLOW" }
-            },
+                if analysis.risk_score > 0.10 {
+                    "BLOCK"
+                } else {
+                    "ALLOW"
+                }
+            }
             "telecom" => {
                 // Telecom allows slight jitter but blocks explicit drops
-                if analysis.risk_score > 0.90 { "BLOCK" } else { "ALLOW" }
-            },
+                if analysis.risk_score > 0.90 {
+                    "BLOCK"
+                } else {
+                    "ALLOW"
+                }
+            }
             _ => {
-                if analysis.risk_score > 0.85 { "BLOCK" } else { "ALLOW" }
+                if analysis.risk_score > 0.85 {
+                    "BLOCK"
+                } else {
+                    "ALLOW"
+                }
             }
         };
 
@@ -68,13 +84,20 @@ impl ProductAdapter for DicomAdapter {
 
     fn analyze(&self, payload: &serde_json::Value) -> Result<AnalysisResult, String> {
         let data: DicomTracePayload = serde_json::from_value(payload.clone()).unwrap();
-        let risk_score = if data.entropy_collapse || data.z_score > 3.0 { 0.95 } else { 0.05 };
+        let risk_score = if data.entropy_collapse || data.z_score > 3.0 {
+            0.95
+        } else {
+            0.05
+        };
         let trust_score = 100.0 - (risk_score * 100.0);
-        
+
         Ok(AnalysisResult {
             risk_score,
             trust_score,
-            message: format!("Medical compliance evaluated for instance: {}", data.affected_instance_uid),
+            message: format!(
+                "Medical compliance evaluated for instance: {}",
+                data.affected_instance_uid
+            ),
         })
     }
 }
@@ -89,13 +112,20 @@ impl ProductAdapter for ProofTraceAdapter {
 
     fn analyze(&self, payload: &serde_json::Value) -> Result<AnalysisResult, String> {
         let data: ProofTrace5GPayload = serde_json::from_value(payload.clone()).unwrap();
-        let risk_score = if data.bit_flip_detected || data.sequence_gap > 5 { 0.99 } else { 0.01 };
+        let risk_score = if data.bit_flip_detected || data.sequence_gap > 5 {
+            0.99
+        } else {
+            0.01
+        };
         let trust_score = 100.0 - (risk_score * 100.0);
 
         Ok(AnalysisResult {
             risk_score,
             trust_score,
-            message: format!("Network telemetry verified at slice node: {}", data.gnode_b_id),
+            message: format!(
+                "Network telemetry verified at slice node: {}",
+                data.gnode_b_id
+            ),
         })
     }
 }
@@ -110,7 +140,11 @@ impl ProductAdapter for StellarAdapter {
 
     fn analyze(&self, payload: &serde_json::Value) -> Result<AnalysisResult, String> {
         let data: StellarFlowPayload = serde_json::from_value(payload.clone()).unwrap();
-        let risk_score = if !data.multisig_threshold_met { 0.85 } else { 0.10 };
+        let risk_score = if !data.multisig_threshold_met {
+            0.85
+        } else {
+            0.10
+        };
         let trust_score = 100.0 - (risk_score * 100.0);
 
         Ok(AnalysisResult {
@@ -133,7 +167,7 @@ impl AdapterRegistry {
         adapters.insert("dicom-trace".to_string(), Arc::new(DicomAdapter));
         adapters.insert("prooftrace-5g".to_string(), Arc::new(ProofTraceAdapter));
         adapters.insert("stellarflow".to_string(), Arc::new(StellarAdapter));
-        
+
         Self { adapters }
     }
 

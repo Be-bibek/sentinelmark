@@ -1,12 +1,15 @@
-use utoipa::OpenApi;
 use crate::{
-    adapters::models::{EventIngestRequest, ActionPolicy, DicomTracePayload, ProofTrace5GPayload, StellarFlowPayload},
+    adapters::models::{
+        ActionPolicy, DicomTracePayload, EventIngestRequest, ProofTrace5GPayload,
+        StellarFlowPayload,
+    },
     error::PlatformErrorResponse,
     response::ApiResponse,
     routes::events::EventResponse,
 };
+use utoipa::OpenApi;
 
-// Generic response schemas are tricky with utoipa macros, 
+// Generic response schemas are tricky with utoipa macros,
 // so we typically declare the specific instantiated response envelopes manually or via macros.
 
 #[derive(OpenApi)]

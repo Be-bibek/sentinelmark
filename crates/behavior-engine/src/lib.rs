@@ -41,10 +41,13 @@ pub struct BehaviorDeviationReport {
 pub struct BehaviorEngine;
 
 impl BehaviorEngine {
-    pub fn detect_deviations(profile: &BehaviorProfile, event: &TelemetryEvent) -> BehaviorDeviationReport {
+    pub fn detect_deviations(
+        profile: &BehaviorProfile,
+        event: &TelemetryEvent,
+    ) -> BehaviorDeviationReport {
         let new_device = !profile.known_devices.contains(&event.device_id.0);
         let unusual_location = !profile.known_regions.contains(&event.geo_region);
-        
+
         let mut abnormal_transaction_amount = false;
         if let Some(amt) = event.transaction_amount {
             // Simplistic rule for deterministic behavior
@@ -57,9 +60,15 @@ impl BehaviorEngine {
         }
 
         let mut risk_factors = 0;
-        if new_device { risk_factors += 1; }
-        if unusual_location { risk_factors += 1; }
-        if abnormal_transaction_amount { risk_factors += 2; }
+        if new_device {
+            risk_factors += 1;
+        }
+        if unusual_location {
+            risk_factors += 1;
+        }
+        if abnormal_transaction_amount {
+            risk_factors += 2;
+        }
 
         let overall_severity = match risk_factors {
             0 => Severity::Low,
@@ -71,7 +80,7 @@ impl BehaviorEngine {
         BehaviorDeviationReport {
             new_device,
             unusual_location,
-            unusual_login_time: false, // Stubbed for example
+            unusual_login_time: false,        // Stubbed for example
             abnormal_session_duration: false, // Stubbed for example
             abnormal_transaction_amount,
             abnormal_workflow_sequence: false, // Stubbed for example

@@ -1,10 +1,13 @@
-use reqwest::{Client as ReqwestClient, header::{HeaderMap, HeaderValue}};
+use chrono::Utc;
+use reqwest::{
+    Client as ReqwestClient,
+    header::{HeaderMap, HeaderValue},
+};
 use std::time::Duration;
 use uuid::Uuid;
-use chrono::Utc;
 
 use crate::error::SentinelMarkError;
-use crate::models::{EvaluateOptions, InternalEventRequest, ApiResponse, EventResponse, ErrorBody};
+use crate::models::{ApiResponse, ErrorBody, EvaluateOptions, EventResponse, InternalEventRequest};
 
 const SDK_VERSION: &str = "1.0.0";
 
@@ -25,7 +28,13 @@ impl SentinelMark {
         SentinelMarkBuilder::new(api_key)
     }
 
-    pub(crate) async fn request<T, R>(&self, method: reqwest::Method, path: &str, body: Option<&T>, custom_headers: Option<HeaderMap>) -> Result<R, SentinelMarkError>
+    pub(crate) async fn request<T, R>(
+        &self,
+        method: reqwest::Method,
+        path: &str,
+        body: Option<&T>,
+        custom_headers: Option<HeaderMap>,
+    ) -> Result<R, SentinelMarkError>
     where
         T: serde::Serialize,
         R: serde::de::DeserializeOwned,
@@ -35,9 +44,12 @@ impl SentinelMark {
 
         loop {
             let mut req = self.client.request(method.clone(), &url);
-            
+
             let mut headers = HeaderMap::new();
-            headers.insert("X-Request-Id", HeaderValue::from_str(&Uuid::new_v4().to_string()).unwrap());
+            headers.insert(
+                "X-Request-Id",
+                HeaderValue::from_str(&Uuid::new_v4().to_string()).unwrap(),
+            );
             if let Some(ref ch) = custom_headers {
                 for (k, v) in ch.iter() {
                     headers.insert(k.clone(), v.clone());
@@ -61,11 +73,16 @@ impl SentinelMark {
                         return Ok(data);
                     }
 
-                    if (status.as_u16() == 429 || status.is_server_error()) && retries < self.max_retries {
+                    if (status.as_u16() == 429 || status.is_server_error())
+                        && retries < self.max_retries
+                    {
                         retries += 1;
                         let sleep_time = 2u64.pow(retries) * 250;
                         if self.debug {
-                            println!("[SentinelMark] Request failed with {}. Retrying in {}ms...", status, sleep_time);
+                            println!(
+                                "[SentinelMark] Request failed with {}. Retrying in {}ms...",
+                                status, sleep_time
+                            );
                         }
                         tokio::time::sleep(Duration::from_millis(sleep_time)).await;
                         continue;
@@ -78,7 +95,10 @@ impl SentinelMark {
                         retries += 1;
                         let sleep_time = 2u64.pow(retries) * 250;
                         if self.debug {
-                            println!("[SentinelMark] Network error: {}. Retrying in {}ms...", e, sleep_time);
+                            println!(
+                                "[SentinelMark] Network error: {}. Retrying in {}ms...",
+                                e, sleep_time
+                            );
                         }
                         tokio::time::sleep(Duration::from_millis(sleep_time)).await;
                         continue;
@@ -95,14 +115,34 @@ impl SentinelMark {
 
         let (code, msg, req_id) = match error_body {
             Ok(b) => (b.error_code, b.message, b.request_id),
-            Err(_) => ("UNKNOWN".to_string(), "Unknown error".to_string(), "".to_string()),
+            Err(_) => (
+                "UNKNOWN".to_string(),
+                "Unknown error".to_string(),
+                "".to_string(),
+            ),
         };
 
         match status.as_u16() {
-            401 | 403 => SentinelMarkError::Auth { error_code: code, message: msg, request_id: req_id },
-            400 => SentinelMarkError::Validation { error_code: code, message: msg, request_id: req_id },
-            429 => SentinelMarkError::RateLimit { error_code: code, message: msg, request_id: req_id },
-            500..=599 => SentinelMarkError::Api { error_code: code, message: msg, request_id: req_id },
+            401 | 403 => SentinelMarkError::Auth {
+                error_code: code,
+                message: msg,
+                request_id: req_id,
+            },
+            400 => SentinelMarkError::Validation {
+                error_code: code,
+                message: msg,
+                request_id: req_id,
+            },
+            429 => SentinelMarkError::RateLimit {
+                error_code: code,
+                message: msg,
+                request_id: req_id,
+            },
+            500..=599 => SentinelMarkError::Api {
+                error_code: code,
+                message: msg,
+                request_id: req_id,
+            },
             _ => SentinelMarkError::Unknown(msg),
         }
     }
@@ -139,10 +179,19 @@ impl SentinelMarkBuilder {
 
     pub fn build(self) -> Result<SentinelMark, SentinelMarkError> {
         let mut headers = HeaderMap::new();
-        headers.insert("Authorization", HeaderValue::from_str(&format!("Bearer {}", self.api_key)).unwrap());
+        headers.insert(
+            "Authorization",
+            HeaderValue::from_str(&format!("Bearer {}", self.api_key)).unwrap(),
+        );
         headers.insert("X-SentinelMark-SDK", HeaderValue::from_static("rust"));
-        headers.insert("X-SentinelMark-Version", HeaderValue::from_static(SDK_VERSION));
-        headers.insert("User-Agent", HeaderValue::from_str(&format!("sentinelmark-rust/{}", SDK_VERSION)).unwrap());
+        headers.insert(
+            "X-SentinelMark-Version",
+            HeaderValue::from_static(SDK_VERSION),
+        );
+        headers.insert(
+            "User-Agent",
+            HeaderValue::from_str(&format!("sentinelmark-rust/{}", SDK_VERSION)).unwrap(),
+        );
 
         let client = ReqwestClient::builder()
             .timeout(Duration::from_secs(self.timeout))
@@ -164,7 +213,11 @@ impl SentinelMarkBuilder {
 pub struct EventsResource;
 
 impl EventsResource {
-    pub async fn evaluate(&self, client: &SentinelMark, options: EvaluateOptions) -> Result<ApiResponse<EventResponse>, SentinelMarkError> {
+    pub async fn evaluate(
+        &self,
+        client: &SentinelMark,
+        options: EvaluateOptions,
+    ) -> Result<ApiResponse<EventResponse>, SentinelMarkError> {
         let mut headers = HeaderMap::new();
         if let Some(idem) = options.idempotency_key {
             headers.insert("Idempotency-Key", HeaderValue::from_str(&idem).unwrap());
@@ -181,6 +234,13 @@ impl EventsResource {
             metadata: options.metadata.unwrap_or_else(|| serde_json::json!({})),
         };
 
-        client.request(reqwest::Method::POST, "/api/v1/events", Some(&body), Some(headers)).await
+        client
+            .request(
+                reqwest::Method::POST,
+                "/api/v1/events",
+                Some(&body),
+                Some(headers),
+            )
+            .await
     }
 }

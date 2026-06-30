@@ -1,4 +1,4 @@
-﻿//! Configuration module — loads and validates all environment variables.
+//! Configuration module — loads and validates all environment variables.
 //! Fails fast on invalid production configuration.
 
 use std::env;
@@ -35,7 +35,9 @@ impl Config {
         let port = env::var("PORT")
             .unwrap_or_else(|_| "8080".to_string())
             .parse::<u16>()
-            .map_err(|_| ConfigError::InvalidValue("PORT must be a valid port number".to_string()))?;
+            .map_err(|_| {
+                ConfigError::InvalidValue("PORT must be a valid port number".to_string())
+            })?;
 
         let database_url = env::var("DATABASE_URL")
             .map_err(|_| ConfigError::Missing("DATABASE_URL".to_string()))?;
@@ -64,7 +66,10 @@ impl Config {
             _ => Environment::Development,
         };
 
-        if environment == Environment::Production && auth_mode == AuthMode::Jwt && jwt_secret.is_none() {
+        if environment == Environment::Production
+            && auth_mode == AuthMode::Jwt
+            && jwt_secret.is_none()
+        {
             return Err(ConfigError::InvalidValue(
                 "JWT_SECRET is required when AUTH_MODE=jwt in production".to_string(),
             ));

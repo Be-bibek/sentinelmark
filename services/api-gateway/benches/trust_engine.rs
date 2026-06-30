@@ -4,12 +4,12 @@
 //!
 //! Measures: P50/P95/P99 latency, throughput, memory per evaluation.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
-use sentinelmark_rs::SentinelMark;
-use telemetry_engine::{TelemetryEvent, ActionType};
-use sentinelmark_core::{UserId, DeviceId};
 use behavior_engine::BehaviorProfile;
 use chrono::Utc;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use sentinelmark_core::{DeviceId, UserId};
+use sentinelmark_rs::SentinelMark;
+use telemetry_engine::{ActionType, TelemetryEvent};
 
 fn build_event() -> TelemetryEvent {
     TelemetryEvent {

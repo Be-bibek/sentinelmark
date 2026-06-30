@@ -2,21 +2,21 @@
 //!
 //! Executes: Telemetry → Behavior → Risk → Trust → Policy → Audit → WS Broadcast
 
-use axum::{extract::State, Json, http::HeaderMap};
-use serde::{Deserialize, Serialize};
+use axum::{extract::State, http::HeaderMap, Json};
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
 use std::time::Instant;
 use tracing::{info, instrument};
 use validator::Validate;
 
-use crate::{error::AppError, response::ApiResponse, state::AppState, telemetry};
 use crate::ws::WsEvent;
+use crate::{error::AppError, response::ApiResponse, state::AppState, telemetry};
 
-use sentinelmark_core::UserId;
-use telemetry_engine::{TelemetryEvent, ActionType};
 use audit_engine::AuditEntry;
-use storage_engine::{ProfileRepository, AuditRepository, TelemetryRepository, TelemetryRow};
+use sentinelmark_core::UserId;
 use sentinelmark_rs::EvaluationResult;
+use storage_engine::{AuditRepository, ProfileRepository, TelemetryRepository, TelemetryRow};
+use telemetry_engine::{ActionType, TelemetryEvent};
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct EvaluateRequest {
@@ -64,7 +64,9 @@ pub async fn evaluate(
         .to_string();
 
     // Validate input
-    payload.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
 
     let user_id = UserId(payload.user_id.clone());
     let start = Instant::now();
@@ -123,7 +125,12 @@ pub async fn evaluate(
     };
     let audit_id = state
         .storage
-        .record_decision(&audit_entry, result.risk_score, result.explanation.clone(), eval_ms)
+        .record_decision(
+            &audit_entry,
+            result.risk_score,
+            result.explanation.clone(),
+            eval_ms,
+        )
         .await
         .ok()
         .map(|id| id.to_string());

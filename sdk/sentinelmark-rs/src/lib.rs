@@ -12,12 +12,12 @@
 //! // println!("{:?}", result.decision);
 //! ```
 
+use behavior_engine::{BehaviorEngine, BehaviorProfile};
+use policy_engine::{PolicyDecision, PolicyEngine};
+use risk_engine::RiskEngine;
 use serde::{Deserialize, Serialize};
 use telemetry_engine::TelemetryEvent;
-use behavior_engine::{BehaviorEngine, BehaviorProfile};
-use risk_engine::RiskEngine;
 use trust_engine::TrustEngine;
-use policy_engine::{PolicyEngine, PolicyDecision};
 
 /// The complete output from a single trust evaluation.
 #[derive(Debug, Serialize, Deserialize)]
@@ -46,10 +46,10 @@ impl SentinelMark {
     ///
     /// All computation is pure and deterministic. No I/O is performed.
     pub fn evaluate(&self, event: &TelemetryEvent, profile: &BehaviorProfile) -> EvaluationResult {
-        let deviation  = BehaviorEngine::detect_deviations(profile, event);
-        let risk       = RiskEngine::assess(&deviation);
-        let trust      = TrustEngine::evaluate(&risk);
-        let policy     = PolicyEngine::enforce(&trust);
+        let deviation = BehaviorEngine::detect_deviations(profile, event);
+        let risk = RiskEngine::assess(&deviation);
+        let trust = TrustEngine::evaluate(&risk);
+        let policy = PolicyEngine::enforce(&trust);
 
         EvaluationResult {
             risk_score: risk.score,

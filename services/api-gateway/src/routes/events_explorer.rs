@@ -1,10 +1,7 @@
-use axum::{Extension, extract::State, Json, http::StatusCode, response::IntoResponse};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Extension, Json};
 use serde_json::json;
 
-use crate::{
-    middleware::auth::AuthContext,
-    state::AppState,
-};
+use crate::{middleware::auth::AuthContext, state::AppState};
 
 pub async fn list_events(
     State(state): State<AppState>,
@@ -34,21 +31,30 @@ pub async fn list_events(
 
     match records {
         Ok(rows) => {
-            let events: Vec<_> = rows.into_iter().map(|r| json!({
-                "id": r.0,
-                "product_slug": r.1,
-                "event_type": r.2,
-                "severity": r.3,
-                "risk_score": r.4,
-                "trust_score": r.5,
-                "action_taken": r.6,
-                "timestamp": r.7
-            })).collect();
+            let events: Vec<_> = rows
+                .into_iter()
+                .map(|r| {
+                    json!({
+                        "id": r.0,
+                        "product_slug": r.1,
+                        "event_type": r.2,
+                        "severity": r.3,
+                        "risk_score": r.4,
+                        "trust_score": r.5,
+                        "action_taken": r.6,
+                        "timestamp": r.7
+                    })
+                })
+                .collect();
             (StatusCode::OK, Json(json!({ "events": events }))).into_response()
-        },
+        }
         Err(e) => {
             tracing::error!("DB Error: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "Database error" }))).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": "Database error" })),
+            )
+                .into_response()
         }
     }
 }

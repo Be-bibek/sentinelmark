@@ -1,13 +1,13 @@
 //! Shared application state injected into all Axum handlers.
 
-use std::sync::Arc;
-use sqlx::PgPool;
-use tokio::sync::broadcast;
+use crate::adapters::AdapterRegistry;
 use crate::config::Config;
 use crate::ws::WsEvent;
-use storage_engine::PostgresStorage;
 use sentinelmark_rs::SentinelMark;
-use crate::adapters::AdapterRegistry;
+use sqlx::PgPool;
+use std::sync::Arc;
+use storage_engine::PostgresStorage;
+use tokio::sync::broadcast;
 
 #[derive(Clone)]
 pub struct AppState {

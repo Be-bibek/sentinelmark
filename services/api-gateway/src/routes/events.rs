@@ -1,22 +1,14 @@
-use axum::{
-    extract::State,
-    http::HeaderMap,
-    response::IntoResponse,
-    Extension, Json,
-};
+use axum::{extract::State, http::HeaderMap, response::IntoResponse, Extension, Json};
+use chrono::{Duration, Utc};
+use serde::Serialize;
 use serde_json::json;
 use std::time::Instant;
-use uuid::Uuid;
-use chrono::{Utc, Duration};
-use serde::Serialize;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::{
-    adapters::models::EventIngestRequest,
-    error::PlatformError,
-    middleware::auth::AuthContext,
-    response::ApiResponse,
-    state::AppState,
+    adapters::models::EventIngestRequest, error::PlatformError, middleware::auth::AuthContext,
+    response::ApiResponse, state::AppState,
 };
 
 #[derive(Debug, Serialize, ToSchema, Clone)]
@@ -177,7 +169,7 @@ pub async fn handle_platform_event(
         let p_id = auth_ctx.project_id;
         let t_id = auth_ctx.tenant_id;
         let body = response_json.clone();
-        
+
         tokio::spawn(async move {
             let expires_at = Utc::now() + Duration::hours(24);
             let _ = sqlx::query(

@@ -1,15 +1,15 @@
-﻿//! POST /api/v1/telemetry — Ingest and persist raw telemetry events.
+//! POST /api/v1/telemetry — Ingest and persist raw telemetry events.
 
-use axum::{extract::State, Json, http::HeaderMap};
-use serde::{Deserialize, Serialize};
+use axum::{extract::State, http::HeaderMap, Json};
 use chrono::Utc;
-use validator::Validate;
+use serde::{Deserialize, Serialize};
 use tracing::info;
+use validator::Validate;
 
-use crate::{error::AppError, response::ApiResponse, state::AppState};
 use crate::ws::WsEvent;
+use crate::{error::AppError, response::ApiResponse, state::AppState};
 use sentinelmark_core::UserId;
-use storage_engine::{TelemetryRepository, TelemetryRow, ProfileRepository};
+use storage_engine::{ProfileRepository, TelemetryRepository, TelemetryRow};
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct TelemetryRequest {
@@ -44,7 +44,9 @@ pub async fn ingest_telemetry(
         .unwrap_or("unknown")
         .to_string();
 
-    payload.validate().map_err(|e| AppError::Validation(e.to_string()))?;
+    payload
+        .validate()
+        .map_err(|e| AppError::Validation(e.to_string()))?;
 
     let user_id = UserId(payload.user_id.clone());
 

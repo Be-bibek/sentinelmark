@@ -1,7 +1,7 @@
-﻿//! GET /api/v1/audit/:user_id — Paginated audit log (newest first).
+//! GET /api/v1/audit/:user_id — Paginated audit log (newest first).
 
 use axum::{
-    extract::{State, Path, Query},
+    extract::{Path, Query, State},
     http::HeaderMap,
 };
 use serde::{Deserialize, Serialize};
@@ -43,10 +43,7 @@ pub async fn get_audit(
     let offset = (page - 1) * per_page;
 
     let uid = UserId(user_id.clone());
-    let entries = state
-        .storage
-        .list_for_user(&uid, per_page, offset)
-        .await?;
+    let entries = state.storage.list_for_user(&uid, per_page, offset).await?;
 
     let total = entries.len();
     info!(user_id = %user_id, count = total, page = page, "Audit log fetched");

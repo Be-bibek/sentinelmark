@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use sentinelmark_core::{UserId, DeviceId};
+use sentinelmark_core::{DeviceId, UserId};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ActionType {

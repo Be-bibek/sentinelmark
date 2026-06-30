@@ -4,8 +4,8 @@
 //! Converts behavioral deviation reports into structured risk assessments.
 //! No network I/O, no randomness, no ML.
 
-use serde::{Deserialize, Serialize};
 use behavior_engine::BehaviorDeviationReport;
+use serde::{Deserialize, Serialize};
 
 /// A fully structured risk assessment with per-factor human-readable explanations.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -75,7 +75,8 @@ impl RiskEngine {
             factors.push("Abnormal transaction volume".to_string());
             explained_factors.push((
                 "Abnormal Transaction Amount".to_string(),
-                "Transaction amount is significantly outside the user's historical range.".to_string(),
+                "Transaction amount is significantly outside the user's historical range."
+                    .to_string(),
                 w,
             ));
         }
@@ -95,7 +96,10 @@ impl RiskEngine {
         let explanation = if score == 0.0 {
             "No risk factors detected. Behavior matches established profile.".to_string()
         } else if score < 0.35 {
-            format!("Low risk ({:.2}). Minor deviations detected but within acceptable thresholds.", score)
+            format!(
+                "Low risk ({:.2}). Minor deviations detected but within acceptable thresholds.",
+                score
+            )
         } else if score < 0.65 {
             format!("Moderate risk ({:.2}). Multiple behavioral deviations require step-up authentication.", score)
         } else {

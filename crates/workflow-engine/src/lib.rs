@@ -47,11 +47,13 @@ pub struct WorkflowEngine;
 
 impl WorkflowEngine {
     /// Compare observed session actions against a defined baseline workflow.
-    pub fn analyze(session: &SessionWorkflow, definition: &WorkflowDefinition) -> WorkflowDeviationReport {
+    pub fn analyze(
+        session: &SessionWorkflow,
+        definition: &WorkflowDefinition,
+    ) -> WorkflowDeviationReport {
         let expected: std::collections::HashSet<&String> =
             definition.expected_sequence.iter().collect();
-        let observed: std::collections::HashSet<&String> =
-            session.actions.iter().collect();
+        let observed: std::collections::HashSet<&String> = session.actions.iter().collect();
 
         let skipped_steps: Vec<String> = expected
             .difference(&observed)
