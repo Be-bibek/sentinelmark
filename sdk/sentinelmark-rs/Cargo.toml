@@ -13,3 +13,4 @@ risk-engine          = { workspace = true }
 trust-engine         = { workspace = true }
 policy-engine        = { workspace = true }
 audit-engine         = { workspace = true }
+context-engine       = { path = "../../crates/context-engine" }

@@ -42,20 +42,23 @@ impl SentinelMark {
         Self
     }
 
-    /// Evaluate a telemetry event against the user's behavior profile.
-    ///
-    /// All computation is pure and deterministic. No I/O is performed.
-    pub fn evaluate(&self, event: &TelemetryEvent, profile: &BehaviorProfile) -> EvaluationResult {
+    pub fn evaluate(
+        &self,
+        event: &TelemetryEvent,
+        profile: &BehaviorProfile,
+        policy: &policy_engine::Policy,
+        context: &context_engine::EventContext,
+    ) -> EvaluationResult {
         let deviation = BehaviorEngine::detect_deviations(profile, event);
         let risk = RiskEngine::assess(&deviation);
         let trust = TrustEngine::evaluate(&risk);
-        let policy = PolicyEngine::enforce(&trust);
+        let policy_result = PolicyEngine::evaluate(policy, &trust, context, false);
 
         EvaluationResult {
             risk_score: risk.score,
             trust_score: trust.score,
-            decision: policy.decision,
-            requires_multi_sig: policy.requires_multi_sig,
+            decision: policy_result.decision,
+            requires_multi_sig: false, // In MVP we can infer from decision if needed
             reasons: risk.factors,
             explanation: risk.explanation,
         }

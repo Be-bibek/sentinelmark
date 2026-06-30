@@ -22,6 +22,8 @@ telemetry-engine     = { workspace = true }
 behavior-engine      = { workspace = true }
 audit-engine         = { workspace = true }
 policy-engine        = { workspace = true }
+context-engine       = { path = "../../crates/context-engine" }
+trust-engine         = { workspace = true }
 sentinelmark-core    = { workspace = true }
 tokio        = { workspace = true }
 axum         = { workspace = true }

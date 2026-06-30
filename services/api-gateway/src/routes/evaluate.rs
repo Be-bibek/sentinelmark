@@ -25,7 +25,7 @@ pub struct EvaluateRequest {
     pub event: TelemetryEventInput,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct TelemetryEventInput {
     #[validate(length(min = 1, message = "device_id cannot be empty"))]
     pub device_id: String,
@@ -109,8 +109,25 @@ pub async fn evaluate(
     };
     let _ = state.storage.insert_event(&user_id, &telemetry_row).await;
 
+    let mut context_variables = std::collections::HashMap::new();
+    let payload_val = serde_json::to_value(&payload.event).unwrap_or(serde_json::Value::Null);
+    let context = context_engine::EventContext::enrich(
+        "default",
+        &payload.event.action_type,
+        &payload_val,
+        &serde_json::Value::Null,
+        context_variables,
+    );
+
+    let policy = policy_engine::Policy {
+        id: uuid::Uuid::new_v4(),
+        version: 1,
+        variables: std::collections::HashMap::new(),
+        groups: vec![],
+    };
+
     // Run full SDK evaluation pipeline (deterministic, no I/O)
-    let result: EvaluationResult = state.sdk.evaluate(&event, &profile);
+    let result: EvaluationResult = state.sdk.evaluate(&event, &profile, &policy, &context);
     let eval_ms = start.elapsed().as_millis() as i64;
 
     let decision_str = format!("{:?}", result.decision);

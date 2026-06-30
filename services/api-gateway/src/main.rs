@@ -190,6 +190,18 @@ async fn main() {
         .route("/team", get(routes::team::list_team))
         .route("/organizations/current", get(routes::tenants::get_tenant))
         .route("/usage", get(routes::usage::get_usage_metrics))
+        // Policy Engine APIs
+        .route(
+            "/projects/:project_id/policies",
+            get(routes::policies::list_policies).post(routes::policies::create_policy),
+        )
+        .route("/policies/:policy_id/versions", get(routes::policies::list_versions))
+        .route("/policies/versions/:version_id/activate", post(routes::policies::activate_version))
+        .route("/policies/versions/:version_id/rollback", post(routes::policies::rollback_version))
+        .route("/policies/versions/:version_id/simulate", post(routes::policies::simulate_policy))
+        .route("/policies/:policy_id/archive", post(routes::policies::archive_policy))
+        .route("/policies/:policy_id/export", get(routes::policies::export_policy))
+        .route("/projects/:project_id/policies/import", post(routes::policies::import_policy))
         // WebSocket
         .route("/ws", get(ws_handler))
         .layer(axum::middleware::from_fn_with_state(

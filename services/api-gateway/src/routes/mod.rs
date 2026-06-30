@@ -13,3 +13,4 @@ pub mod telemetry;
 pub mod tenants;
 pub mod usage;
 pub mod version;
+pub mod policies;

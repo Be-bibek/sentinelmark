@@ -1,120 +1,246 @@
-//! Policy Engine
-//!
-//! Threshold-based decision engine. Pure and deterministic.
-//! No external calls — inputs in, decisions out.
-
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::HashMap;
+use context_engine::EventContext;
 use trust_engine::TrustScore;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PolicyDecision {
     Allow,
     RequireMFA,
-    /// Requires human approval via an out-of-band multi-sig escalation flow.
     RequireApproval,
     Block,
 }
 
-/// Full policy decision including the decision itself and detailed reasoning.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum Operator {
+    Equals,
+    NotEquals,
+    GreaterThan,
+    LessThan,
+    GreaterThanOrEqual,
+    LessThanOrEqual,
+    In,
+    NotIn,
+    Contains,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Condition {
+    And { and: Vec<Condition> },
+    Or { or: Vec<Condition> },
+    Not { not: Box<Condition> },
+    Expression {
+        operator: Operator,
+        field: String,
+        value: Value,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Rule {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub priority: i32,
+    pub enabled: bool,
+    pub continue_processing: bool,
+    pub condition: Condition,
+    pub action: PolicyDecision,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RuleGroup {
+    pub id: String,
+    pub name: String,
+    pub rules: Vec<Rule>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Policy {
+    pub id: Uuid,
+    pub version: i32,
+    pub variables: HashMap<String, Value>,
+    pub groups: Vec<RuleGroup>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MatchedRuleInfo {
+    pub rule_id: String,
+    pub rule_name: String,
+    pub action: PolicyDecision,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PolicyResult {
     pub decision: PolicyDecision,
-    pub trust_score: f64,
-    pub threshold_applied: &'static str,
-    pub rationale: String,
-    pub requires_multi_sig: bool,
+    pub matched_rules: Vec<MatchedRuleInfo>,
+    pub is_dry_run: bool,
 }
 
 pub struct PolicyEngine;
 
 impl PolicyEngine {
-    /// Enforce trust thresholds and produce a structured policy result.
-    pub fn enforce(trust: &TrustScore) -> PolicyResult {
-        let score = trust.score;
+    pub fn evaluate(
+        policy: &Policy,
+        trust: &TrustScore,
+        context: &EventContext,
+        is_dry_run: bool,
+    ) -> PolicyResult {
+        let mut matched_rules = Vec::new();
+        let mut final_decision = PolicyDecision::Allow;
+        let mut stop_processing = false;
 
-        if score > 0.85 {
-            PolicyResult {
-                decision: PolicyDecision::Allow,
-                trust_score: score,
-                threshold_applied: "Trust > 0.85",
-                rationale:
-                    "High trust context established. Behavioral profile matches all baselines."
-                        .to_string(),
-                requires_multi_sig: false,
+        // Flatten rules and sort by priority (highest first)
+        let mut all_rules: Vec<&Rule> = policy
+            .groups
+            .iter()
+            .flat_map(|g| g.rules.iter())
+            .filter(|r| r.enabled)
+            .collect();
+        all_rules.sort_by(|a, b| b.priority.cmp(&a.priority));
+
+        for rule in all_rules {
+            if stop_processing {
+                break;
             }
-        } else if score > 0.65 {
-            PolicyResult {
-                decision: PolicyDecision::RequireMFA,
-                trust_score: score,
-                threshold_applied: "Trust 0.65–0.85",
-                rationale: "Moderate trust context. Step-up authentication required before sensitive actions.".to_string(),
-                requires_multi_sig: false,
+
+            if Self::evaluate_condition(&rule.condition, trust, context, &policy.variables) {
+                matched_rules.push(MatchedRuleInfo {
+                    rule_id: rule.id.clone(),
+                    rule_name: rule.name.clone(),
+                    action: rule.action.clone(),
+                });
+
+                // In dry run, we log matches but don't let them override the final decision.
+                if !is_dry_run {
+                    final_decision = rule.action.clone();
+                    if !rule.continue_processing {
+                        stop_processing = true;
+                    }
+                }
             }
-        } else if score > 0.45 {
-            PolicyResult {
-                decision: PolicyDecision::RequireApproval,
-                trust_score: score,
-                threshold_applied: "Trust 0.45–0.65",
-                rationale: "Low trust context. Request escalated to multi-sig approval flow. No automated execution permitted.".to_string(),
-                requires_multi_sig: true,
+        }
+
+        PolicyResult {
+            decision: final_decision,
+            matched_rules,
+            is_dry_run,
+        }
+    }
+
+    fn evaluate_condition(
+        condition: &Condition,
+        trust: &TrustScore,
+        context: &EventContext,
+        variables: &HashMap<String, Value>,
+    ) -> bool {
+        match condition {
+            Condition::And { and } => and.iter().all(|c| Self::evaluate_condition(c, trust, context, variables)),
+            Condition::Or { or } => or.iter().any(|c| Self::evaluate_condition(c, trust, context, variables)),
+            Condition::Not { not } => !Self::evaluate_condition(not, trust, context, variables),
+            Condition::Expression { operator, field, value } => {
+                let resolved_value = Self::resolve_variable(value, variables);
+                let field_value = Self::extract_field(field, trust, context);
+                
+                Self::compare(&field_value, operator, &resolved_value)
             }
-        } else {
-            PolicyResult {
-                decision: PolicyDecision::Block,
-                trust_score: score,
-                threshold_applied: "Trust ≤ 0.45",
-                rationale:
-                    "Critically low trust. Session blocked. Security operations must be notified."
-                        .to_string(),
-                requires_multi_sig: false,
+        }
+    }
+
+    fn resolve_variable(value: &Value, variables: &HashMap<String, Value>) -> Value {
+        if let Some(s) = value.as_str() {
+            if s.starts_with("${") && s.ends_with("}") {
+                let var_name = &s[2..s.len()-1];
+                if let Some(val) = variables.get(var_name) {
+                    return val.clone();
+                }
+            }
+        }
+        value.clone()
+    }
+
+    fn extract_field(field: &str, trust: &TrustScore, context: &EventContext) -> Option<Value> {
+        if field == "trust.risk_score" {
+            return Some(serde_json::json!(1.0 - trust.score));
+        } else if field == "trust.trust_score" {
+            return Some(serde_json::json!(trust.score));
+        } else if field == "context.country" {
+            return context.country.as_ref().map(|s| serde_json::json!(s));
+        } else if field == "context.product" {
+            return Some(serde_json::json!(context.product));
+        }
+        
+        if field.starts_with("event.") {
+            let key = &field[6..];
+            return context.payload.get(key).cloned();
+        }
+        
+        None
+    }
+
+    fn compare(field_value: &Option<Value>, operator: &Operator, target_value: &Value) -> bool {
+        let field_val = match field_value {
+            Some(v) => v,
+            None => return false, // Field not present, expression is false
+        };
+
+        match operator {
+            Operator::Equals => field_val == target_value,
+            Operator::NotEquals => field_val != target_value,
+            Operator::GreaterThan => {
+                if let (Some(f), Some(t)) = (field_val.as_f64(), target_value.as_f64()) {
+                    f > t
+                } else {
+                    false
+                }
+            }
+            Operator::LessThan => {
+                if let (Some(f), Some(t)) = (field_val.as_f64(), target_value.as_f64()) {
+                    f < t
+                } else {
+                    false
+                }
+            }
+            Operator::GreaterThanOrEqual => {
+                if let (Some(f), Some(t)) = (field_val.as_f64(), target_value.as_f64()) {
+                    f >= t
+                } else {
+                    false
+                }
+            }
+            Operator::LessThanOrEqual => {
+                if let (Some(f), Some(t)) = (field_val.as_f64(), target_value.as_f64()) {
+                    f <= t
+                } else {
+                    false
+                }
+            }
+            Operator::In => {
+                if let Some(arr) = target_value.as_array() {
+                    arr.contains(field_val)
+                } else {
+                    false
+                }
+            }
+            Operator::NotIn => {
+                if let Some(arr) = target_value.as_array() {
+                    !arr.contains(field_val)
+                } else {
+                    false
+                }
+            }
+            Operator::Contains => {
+                if let (Some(s), Some(target)) = (field_val.as_str(), target_value.as_str()) {
+                    s.contains(target)
+                } else {
+                    false
+                }
             }
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use trust_engine::TrustScore;
-
-    fn trust(score: f64) -> TrustScore {
-        TrustScore {
-            score,
-            confidence: 0.9,
-            reasons: vec![],
-        }
-    }
-
-    #[test]
-    fn test_high_trust_allows() {
-        let result = PolicyEngine::enforce(&trust(0.92));
-        assert_eq!(result.decision, PolicyDecision::Allow);
-        assert!(!result.requires_multi_sig);
-    }
-
-    #[test]
-    fn test_moderate_trust_requires_mfa() {
-        let result = PolicyEngine::enforce(&trust(0.75));
-        assert_eq!(result.decision, PolicyDecision::RequireMFA);
-    }
-
-    #[test]
-    fn test_low_trust_requires_approval_with_multisig() {
-        let result = PolicyEngine::enforce(&trust(0.55));
-        assert_eq!(result.decision, PolicyDecision::RequireApproval);
-        assert!(result.requires_multi_sig);
-    }
-
-    #[test]
-    fn test_very_low_trust_blocks() {
-        let result = PolicyEngine::enforce(&trust(0.30));
-        assert_eq!(result.decision, PolicyDecision::Block);
-        assert!(!result.requires_multi_sig);
-    }
-
-    #[test]
-    fn test_boundary_0_85_is_mfa_not_allow() {
-        let result = PolicyEngine::enforce(&trust(0.85));
-        assert_eq!(result.decision, PolicyDecision::RequireMFA);
-    }
-}
+mod tests;

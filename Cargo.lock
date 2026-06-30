@@ -65,6 +65,7 @@ dependencies = [
  "axum",
  "behavior-engine",
  "chrono",
+ "context-engine",
  "criterion",
  "dotenvy",
  "governor",
@@ -86,6 +87,7 @@ dependencies = [
  "tower-http 0.5.2",
  "tracing",
  "tracing-subscriber",
+ "trust-engine",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid",
@@ -410,6 +412,16 @@ name = "const-oid"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
+
+[[package]]
+name = "context-engine"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "uuid",
+]
 
 [[package]]
 name = "core-foundation"
@@ -1923,8 +1935,12 @@ dependencies = [
 name = "policy-engine"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "context-engine",
  "serde",
+ "serde_json",
  "trust-engine",
+ "uuid",
 ]
 
 [[package]]
@@ -2622,6 +2638,7 @@ version = "0.1.0"
 dependencies = [
  "audit-engine",
  "behavior-engine",
+ "context-engine",
  "policy-engine",
  "risk-engine",
  "sentinelmark-core",
